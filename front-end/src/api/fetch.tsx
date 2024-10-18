@@ -1,4 +1,4 @@
-export async function fetchClient<TData>(
+export async function fetchClient(
     url: string,
     method: "POST" | "GET" | "DELETE" | "PUT",
     body?: object | null,

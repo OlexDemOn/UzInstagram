@@ -4,6 +4,7 @@ const SERVER = import.meta.env.VITE_SERVER_URL;
 
 const LOGIN_URL = `${SERVER}/user/login`;
 const REGISTER_URL = `${SERVER}/user/register`;
+const POST_URL = `${SERVER}/post`;
 
 export async function test() {
     console.log(SERVER);
@@ -34,4 +35,8 @@ export async function register({
         username,
         password,
     });
+}
+
+export async function getPost() {
+    return await fetchClient(POST_URL, "GET");
 }
