@@ -1,7 +1,7 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
-const Header = React.forwardRef<
+const Footer = React.forwardRef<
     HTMLDivElement,
     React.HTMLProps<HTMLDivElement>
 >((props, ref) => {
@@ -19,4 +19,4 @@ const Header = React.forwardRef<
     );
 });
 
-export default Header;
+export default Footer;

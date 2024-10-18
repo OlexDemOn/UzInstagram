@@ -5,6 +5,5 @@ export const Route = createRootRoute({
         <div className="flex relative flex-1">
             <Outlet />
         </div>
-        // <TanStackRouterDevtools />
     ),
 });

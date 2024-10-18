@@ -14,9 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
 import { Route as AuthImport } from './routes/_auth'
-import { Route as layoutImport } from './routes/__layout'
 import { Route as AuthIndexImport } from './routes/_auth.index'
-import { Route as AuthContestImport } from './routes/_auth.contest'
 
 // Create/Update Routes
 
@@ -35,18 +33,8 @@ const AuthRoute = AuthImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const layoutRoute = layoutImport.update({
-  id: '/__layout',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AuthIndexRoute = AuthIndexImport.update({
   path: '/',
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthContestRoute = AuthContestImport.update({
-  path: '/contest',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -54,13 +42,6 @@ const AuthContestRoute = AuthContestImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/__layout': {
-      id: '/__layout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof layoutImport
-      parentRoute: typeof rootRoute
-    }
     '/_auth': {
       id: '/_auth'
       path: ''
@@ -82,13 +63,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterImport
       parentRoute: typeof rootRoute
     }
-    '/_auth/contest': {
-      id: '/_auth/contest'
-      path: '/contest'
-      fullPath: '/contest'
-      preLoaderRoute: typeof AuthContestImport
-      parentRoute: typeof AuthImport
-    }
     '/_auth/': {
       id: '/_auth/'
       path: '/'
@@ -102,12 +76,10 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthRouteChildren {
-  AuthContestRoute: typeof AuthContestRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthContestRoute: AuthContestRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 
@@ -117,53 +89,39 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/contest': typeof AuthContestRoute
   '/': typeof AuthIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '': typeof layoutRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/contest': typeof AuthContestRoute
   '/': typeof AuthIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/__layout': typeof layoutRoute
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_auth/contest': typeof AuthContestRoute
   '/_auth/': typeof AuthIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/login' | '/register' | '/contest' | '/'
+  fullPaths: '' | '/login' | '/register' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/login' | '/register' | '/contest' | '/'
-  id:
-    | '__root__'
-    | '/__layout'
-    | '/_auth'
-    | '/login'
-    | '/register'
-    | '/_auth/contest'
-    | '/_auth/'
+  to: '/login' | '/register' | '/'
+  id: '__root__' | '/_auth' | '/login' | '/register' | '/_auth/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  layoutRoute: typeof layoutRoute
   AuthRoute: typeof AuthRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  layoutRoute: layoutRoute,
   AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
@@ -181,19 +139,14 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/__layout",
         "/_auth",
         "/login",
         "/register"
       ]
     },
-    "/__layout": {
-      "filePath": "__layout.tsx"
-    },
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
-        "/_auth/contest",
         "/_auth/"
       ]
     },
@@ -202,10 +155,6 @@ export const routeTree = rootRoute
     },
     "/register": {
       "filePath": "register.tsx"
-    },
-    "/_auth/contest": {
-      "filePath": "_auth.contest.tsx",
-      "parent": "/_auth"
     },
     "/_auth/": {
       "filePath": "_auth.index.tsx",

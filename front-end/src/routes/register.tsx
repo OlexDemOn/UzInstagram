@@ -11,17 +11,19 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { useAuth } from "../../providers/AuthProvider";
+import { login, register } from "@/api/endpoints";
+import { useState } from "react";
 
 const fallback = "/" as const;
 
 export const Route = createFileRoute("/register")({
     beforeLoad: ({ context, location }) => {
         console.log("beforeLoad", location);
+        // @ts-expect-error - auth is not in the types
         if (context?.auth.isAuthenticated) {
             throw redirect({ to: fallback });
         }
@@ -49,9 +51,9 @@ function Login() {
 }
 
 const formSchema = z.object({
-    email: z.string().email("Invalid email").nonempty("Email is required"),
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    email: z.string().email("Invalid email address"),
+    username: z.string().nonempty("Username is required"),
+    password: z.string().nonempty("Password is required"),
 });
 
 const FormContainer = () => {
@@ -63,7 +65,6 @@ const FormContainer = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const redirectTo = searchParams.get("redirect") || fallback;
 
-    console.log(redirectTo);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -73,31 +74,21 @@ const FormContainer = () => {
         },
     });
 
-    // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, username, password } = values;
         console.log(fallback);
-        fetch("http://localhost:3000/users/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, username, password }),
-        })
-            .then((response) => response.json())
-            .then(async (data) => {
-                console.log(data);
-                if (data.statusCode === 401) {
-                    setError("Invalid email or password.");
-                    return;
-                }
-                auth.login(data);
-                await router.invalidate();
-                await sleep(100);
-                await navigate({ to: redirectTo });
-                console.log(auth.user?.email);
-            })
-            .catch((error) => console.error(error));
+        if (!email || !username || !password) return;
+        try {
+            const response = await register({ email, username, password });
+            console.log(response);
+            auth.login(response);
+            await router.invalidate();
+        } catch (error) {
+            console.log(error.message);
+            setError(error.message);
+        }
+        // await sleep(100);
+        // await navigate({ to: redirectTo });
     }
 
     return (
@@ -147,7 +138,7 @@ const FormContainer = () => {
                 />
                 {error && <FormMessage type="error">{error}</FormMessage>}
                 <Button type="submit" className="w-full mt-4">
-                    Sign up
+                    Login
                 </Button>
             </form>
         </Form>

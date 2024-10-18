@@ -1,10 +1,10 @@
-package com.example.demo.dto;
+package com.example.demo.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UserDTO {
+public class UserRegistrationDTO {
 
     @NotBlank(message = "Username is mandatory")
     private String username;
@@ -18,15 +18,13 @@ public class UserDTO {
     private String password;
 
     // Constructors
-    public UserDTO() {}
+    public UserRegistrationDTO() {}
 
-    public UserDTO(String username, String email, String password) {
+    public UserRegistrationDTO(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
     }
-
-    // Getters and Setters
 
     public String getUsername() {
         return username;

@@ -1,10 +1,11 @@
-package com.example.demo.model;
+package com.example.demo.user;
 
 import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id"}),
         @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})
 })
@@ -12,7 +13,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long user_id;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -21,24 +22,62 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String password;
+    private String password_hash;
 
-    // Constructors
+    @Column(nullable = false)
+    private String full_name;
+    @Column(nullable = false)
+    private String bio;
+    @Column(nullable = false)
+    private String profile_image_url;
+
     public User() {}
 
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
-        this.password = password;
+        this.password_hash = password;
+        this.full_name = "";
+        this.bio = "";
+        this.profile_image_url = "";
     }
 
-    // Getters and Setters
+    public User(String username, String email, String password_hash, String full_name, String bio, String profile_image_url) {
+        this.username = username;
+        this.email = email;
+        this.password_hash = password_hash;
+        this.full_name = full_name;
+        this.bio = bio;
+        this.profile_image_url = profile_image_url;
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getProfile_image_url() {
+        return profile_image_url;
+    }
+
+    public void setProfile_image_url(String profile_image_url) {
+        this.profile_image_url = profile_image_url;
+    }
 
     public Long getId() {
-        return id;
+        return user_id;
     }
-
-    // No setter for ID since it's auto-generated
 
     public String getUsername() {
         return username;
@@ -57,15 +96,12 @@ public class User {
     }
 
     public String getPassword() {
-        return password;
+        return password_hash;
     }
 
-    // Password should only be set internally after hashing
     public void setPassword(String password) {
-        this.password = password;
+        this.password_hash = password;
     }
-
-    // Override equals and hashCode for entity comparison based on unique fields
 
     @Override
     public boolean equals(Object o) {

@@ -11,17 +11,18 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { useAuth } from "../../providers/AuthProvider";
+import { login } from "@/api/endpoints";
 
 const fallback = "/" as const;
 
 export const Route = createFileRoute("/login")({
     beforeLoad: ({ context, location }) => {
         console.log("beforeLoad", location);
+        // @ts-expect-error - auth is not in the types
         if (context?.auth.isAuthenticated) {
             throw redirect({ to: fallback });
         }
@@ -34,9 +35,6 @@ async function sleep(ms: number) {
 }
 
 function Login() {
-    const test = fetch("http://localhost:5000")
-        .then((response) => response.json())
-        .then((data) => console.log(data));
     return (
         <div className="flex flex-1 justify-center items-center w-full">
             <Card className="w-80">
@@ -52,12 +50,12 @@ function Login() {
 }
 
 const formSchema = z.object({
-    email: z.string().nonempty("Username is required"),
+    usernameOrEmail: z.string().nonempty("Username is required"),
     password: z.string().nonempty("Password is required"),
 });
 
 const FormContainer = () => {
-    const [error, setError] = useState<string | null>(null);
+    // const [error, setError] = useState<string | null>(null);
     const auth = useAuth();
     const router = useRouter();
     const navigate = useNavigate();
@@ -65,43 +63,23 @@ const FormContainer = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const redirectTo = searchParams.get("redirect") || fallback;
 
-    console.log(redirectTo);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
+            usernameOrEmail: "",
             password: "",
         },
     });
 
-    // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const { email, password } = values;
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const { usernameOrEmail, password } = values;
         console.log(fallback);
-        fetch("http://localhost:3000/users/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        })
-            .then((response) => response.json())
-            .then(async (data) => {
-                console.log(data);
-                if (data.statusCode === 401) {
-                    setError("Invalid email or password.");
-                    return;
-                } else if (data.statusCode && data.statusCode !== 200) {
-                    setError("Unknown error");
-                    return;
-                }
-                auth.login(data);
-                await router.invalidate();
-                await sleep(100);
-                await navigate({ to: redirectTo });
-                console.log(auth.user?.email);
-            })
-            .catch((error) => console.error(error));
+        if (!usernameOrEmail || !password) return;
+        const response = await login({ usernameOrEmail, password });
+        auth.login(response);
+        await router.invalidate();
+        await sleep(100);
+        await navigate({ to: redirectTo });
     }
 
     return (
@@ -112,7 +90,7 @@ const FormContainer = () => {
             >
                 <FormField
                     control={form.control}
-                    name="email"
+                    name="usernameOrEmail"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Email</FormLabel>
@@ -136,7 +114,7 @@ const FormContainer = () => {
                         </FormItem>
                     )}
                 />
-                {error && <FormMessage type="error">{error}</FormMessage>}
+                {/* {error && <FormMessage type="error">{error}</FormMessage>} */}
                 <Button type="submit" className="w-full mt-4">
                     Login
                 </Button>
