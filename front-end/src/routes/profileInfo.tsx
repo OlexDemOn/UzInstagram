@@ -26,20 +26,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { useAuth } from "../../providers/AuthProvider";
-import { login } from "@/api/endpoints";
-import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import { updateProfile } from "@/api/endpoints";
 
-const fallback = "/" as const;
-
-export const Route = createFileRoute("/login")({
-    beforeLoad: ({ context, location }) => {
-        console.log("beforeLoad", location);
-        // @ts-expect-error - auth is not in the types
-        if (context?.auth.isAuthenticated) {
-            throw redirect({ to: fallback });
-        }
-    },
+export const Route = createFileRoute("/profileInfo")({
     component: Login,
 });
 
@@ -52,62 +43,51 @@ function Login() {
         <div className="flex flex-1 justify-center items-center w-full">
             <Card className="w-80">
                 <CardHeader>
-                    <CardTitle>Login</CardTitle>
+                    <CardTitle>Give more information about you</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <FormContainer />
                 </CardContent>
-
-                <CardContent className="flex relative">
-                    <Separator />
-                    <div className="absolute w-full translate-x-1/2 -left-1/2 -top-1/2 text-center">
-                        Or
-                    </div>
-                </CardContent>
-                <CardFooter>
-                    <Link className="w-full" to="/register">
-                        <Button variant="ghost" className="w-full">
-                            Sign up
-                        </Button>
-                    </Link>
-                </CardFooter>
             </Card>
         </div>
     );
 }
 
 const formSchema = z.object({
-    usernameOrEmail: z.string().nonempty("Username is required"),
-    password: z.string().nonempty("Password is required"),
+    fullName: z.string().min(4),
+    profileImg: z.string(),
+    bio: z.string(),
 });
 
 const FormContainer = () => {
     const [error, setError] = useState<string | null>(null);
-    const auth = useAuth();
     const router = useRouter();
     const navigate = useNavigate();
-
-    const searchParams = new URLSearchParams(window.location.search);
-    const redirectTo = searchParams.get("redirect") || fallback;
+    const auth = useAuth();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            usernameOrEmail: "",
-            password: "",
+            fullName: "",
+            profileImg: "",
+            bio: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const { usernameOrEmail, password } = values;
-        if (!usernameOrEmail || !password) return;
+        const { fullName, bio, profileImg } = values;
+        const username = auth.user?.username || "";
         try {
-            const response = await login({ usernameOrEmail, password });
-
-            auth.login(response);
+            const response = await updateProfile({
+                username,
+                fullName,
+                bio,
+                profileImg,
+            });
+            console.log(response);
             await router.invalidate();
             await sleep(100);
-            await navigate({ to: redirectTo });
+            await navigate({ to: "/" });
         } catch (error) {
             console.log(error.message);
             setError(error.message);
@@ -122,10 +102,10 @@ const FormContainer = () => {
             >
                 <FormField
                     control={form.control}
-                    name="usernameOrEmail"
+                    name="fullName"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>Full name</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -135,25 +115,44 @@ const FormContainer = () => {
                 />
                 <FormField
                     control={form.control}
-                    name="password"
+                    name="profileImg"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>Profile img</FormLabel>
                             <FormControl>
-                                <Input type="password" {...field} />
+                                <Input {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                {error && <FormMessage typeof="error">{error}</FormMessage>}
-                <Button
-                    variant="secondary"
-                    type="submit"
-                    className="w-full mt-4"
-                >
-                    Login
-                </Button>
+                <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Bio</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {error && <FormMessage type="error">{error}</FormMessage>}
+                <div className="flex justify-between h-10 items-center">
+                    <Button
+                        variant="ghost"
+                        type="submit"
+                        onClick={() => navigate({ to: "/" })}
+                    >
+                        Skip
+                    </Button>
+                    <Separator orientation="vertical" />
+                    <Button variant="secondary" type="submit">
+                        Sign up
+                    </Button>
+                </div>
             </form>
         </Form>
     );

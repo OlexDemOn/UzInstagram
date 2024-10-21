@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 import { ModeToggle } from "./mode-toggle";
@@ -70,18 +70,13 @@ const Navigation = React.forwardRef<
 
 const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
     (props, ref) => {
-        const auth = useAuth();
         return (
             <div
                 className={twMerge("flex items-center", props.className)}
                 ref={ref}
                 {...props}
             >
-                {auth?.isAuthenticated ? (
-                    <AuthenticatedUser />
-                ) : (
-                    <UnauthenticatedUser />
-                )}
+                <AuthenticatedUser />
             </div>
         );
     }
@@ -89,6 +84,12 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
 
 const AuthenticatedUser = () => {
     const auth = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        auth.logout();
+        navigate("/");
+    };
 
     return (
         <DropdownMenu>
@@ -100,32 +101,11 @@ const AuthenticatedUser = () => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    onClick={() => auth.logout()}
+                    onClick={handleLogout}
                     className="hover:cursor-pointer"
                 >
                     Logout
                 </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
-
-const UnauthenticatedUser = () => {
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger>Sign in</DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <Link to="/login">
-                    <DropdownMenuItem className="hover:cursor-pointer">
-                        Login
-                    </DropdownMenuItem>
-                </Link>
-                <DropdownMenuSeparator />
-                <Link to="/register">
-                    <DropdownMenuItem className="hover:cursor-pointer">
-                        Sign Up
-                    </DropdownMenuItem>
-                </Link>
             </DropdownMenuContent>
         </DropdownMenu>
     );

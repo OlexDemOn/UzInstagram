@@ -14,6 +14,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+
     // Register a new user
     public User registerUser(String username, String email, String password) throws Exception {
         // Check if username or email is already taken
@@ -43,5 +44,27 @@ public class UserService {
         }
 
         return user;
+    }
+
+    public User updateUserProfile(UserProfileUpdateDTO updateDTO) {
+        System.out.println("Updating user profile: " + updateDTO.getUsername());
+        User user = userRepository.findByUsername(updateDTO.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updateDTO.getFullName()!= null) {
+            user.setFull_name(updateDTO.getFullName());
+        }
+        if (updateDTO.getBio()!= null) {
+            user.setBio(updateDTO.getBio());
+        }
+        if (updateDTO.getProfileImg()!= null) {
+            user.setProfile_image_url(updateDTO.getProfileImg());
+        }
+
+//        user.setFull_name(updateDTO.getFullName());
+//        user.setBio(updateDTO.getBio());
+//        user.setProfile_image_url(updateDTO.getProfileImg());
+
+        return userRepository.save(user); // Save the updated user profile
     }
 }

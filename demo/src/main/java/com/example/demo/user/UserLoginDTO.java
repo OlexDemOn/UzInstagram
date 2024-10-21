@@ -2,7 +2,11 @@ package com.example.demo.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class UserLoginDTO {
 
     @NotBlank(message = "Username or Email is mandatory")
@@ -20,22 +24,4 @@ public class UserLoginDTO {
         this.password = password;
     }
 
-    // Getters and Setters
-
-    public String getUsernameOrEmail() {
-        return usernameOrEmail;
-    }
-
-    public void setUsernameOrEmail(String usernameOrEmail) {
-        this.usernameOrEmail = usernameOrEmail;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    // Password should be set via input only
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

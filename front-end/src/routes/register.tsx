@@ -1,5 +1,16 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    createFileRoute,
+    Link,
+    redirect,
+    useNavigate,
+} from "@tanstack/react-router";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import {
@@ -15,8 +26,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { useAuth } from "../../providers/AuthProvider";
-import { login, register } from "@/api/endpoints";
+import { register } from "@/api/endpoints";
 import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
 
 const fallback = "/" as const;
 
@@ -45,6 +57,19 @@ function Login() {
                 <CardContent>
                     <FormContainer />
                 </CardContent>
+                <CardContent className="flex relative">
+                    <Separator />
+                    <div className="absolute w-full translate-x-1/2 -left-1/2 -top-1/2 text-center">
+                        Or
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <Link className="w-full" to="/login">
+                        <Button variant="ghost" className="w-full">
+                            Sign in
+                        </Button>
+                    </Link>
+                </CardFooter>
             </Card>
         </div>
     );
@@ -62,9 +87,6 @@ const FormContainer = () => {
     const router = useRouter();
     const navigate = useNavigate();
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const redirectTo = searchParams.get("redirect") || fallback;
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -76,19 +98,20 @@ const FormContainer = () => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, username, password } = values;
-        console.log(fallback);
         if (!email || !username || !password) return;
+        console.log(fallback);
         try {
             const response = await register({ email, username, password });
             console.log(response);
             auth.login(response);
             await router.invalidate();
+            await sleep(100);
+            await navigate({ to: "/profileInfo" });
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
+            console.log("error");
             setError(error.message);
         }
-        // await sleep(100);
-        // await navigate({ to: redirectTo });
     }
 
     return (
@@ -137,8 +160,12 @@ const FormContainer = () => {
                     )}
                 />
                 {error && <FormMessage type="error">{error}</FormMessage>}
-                <Button type="submit" className="w-full mt-4">
-                    Login
+                <Button
+                    variant="secondary"
+                    type="submit"
+                    className="w-full mt-4"
+                >
+                    Sign up
                 </Button>
             </form>
         </Form>

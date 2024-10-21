@@ -4,6 +4,8 @@ const SERVER = import.meta.env.VITE_SERVER_URL;
 
 const LOGIN_URL = `${SERVER}/user/login`;
 const REGISTER_URL = `${SERVER}/user/register`;
+const UPDATEPROFILE_URL = `${SERVER}/user/profile`;
+
 const POST_URL = `${SERVER}/post`;
 
 export async function test() {
@@ -34,6 +36,26 @@ export async function register({
         email,
         username,
         password,
+    });
+}
+
+export async function updateProfile({
+    username,
+    fullName,
+    bio,
+    profileImg,
+}: {
+    username: string;
+    fullName: string;
+    bio: string;
+    profileImg: string;
+}) {
+    console.log({ username, fullName, bio, profileImg });
+    return await fetchClient(UPDATEPROFILE_URL, "PUT", {
+        username,
+        fullName,
+        bio,
+        profileImg,
     });
 }
 

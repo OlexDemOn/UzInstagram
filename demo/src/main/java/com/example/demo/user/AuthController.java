@@ -3,7 +3,6 @@
 package com.example.demo.user;
 
 import com.example.demo.dto.ApiResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,7 +59,7 @@ public class AuthController {
 
     // Endpoint for user login
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> loginUser(@Valid @RequestBody UserLoginDTO userLoginDTO, BindingResult bindingResult, HttpSession session) {
+    public ResponseEntity<ApiResponse> loginUser(@Valid @RequestBody UserLoginDTO userLoginDTO, BindingResult bindingResult) {
         // Validation handled by GlobalExceptionHandler
         if (bindingResult.hasErrors()) {
             // Collect errors
@@ -78,7 +77,6 @@ public class AuthController {
             // userLoginDTO.getUsernameOrEmail() can contain either username or email
             User user = userService.authenticateUser(userLoginDTO.getUsernameOrEmail(), userLoginDTO.getPassword());
             // Set user in session
-            session.setAttribute("user", user);
             UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
             ApiResponse response = new ApiResponse(true, "User logged in successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -89,18 +87,47 @@ public class AuthController {
     }
 
     // Endpoint to get the current logged-in user's profile
-    @GetMapping("/profile")
-    public ResponseEntity<ApiResponse> getUserProfile(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
+//    @GetMapping("/profile")
+//    public ResponseEntity<ApiResponse> getUserProfile(HttpSession session) {
+//        User user = (User) session.getAttribute("user");
+//        if (user != null) {
+//            UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
+//            ApiResponse response = new ApiResponse(true, "User profile fetched successfully", responseDTO);
+//            return new ResponseEntity<>(response, HttpStatus.OK);
+//        } else {
+//            ApiResponse response = new ApiResponse(false, "User is not logged in");
+//            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+//        }
+//    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse> updateUserProfile(@RequestBody UserProfileUpdateDTO updateDTO, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getAllErrors().forEach((error) -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+            ApiResponse response = new ApiResponse(false, "Validation Failed", errors);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            User user = userService.updateUserProfile(updateDTO);
             UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
-            ApiResponse response = new ApiResponse(true, "User profile fetched successfully", responseDTO);
+            ApiResponse response = new ApiResponse(true, "User logged in successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            ApiResponse response = new ApiResponse(false, "User is not logged in");
+        } catch (Exception e) {
+            ApiResponse response = new ApiResponse(false, e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
+//        if (user != null) {
+//            User updatedUser = userService.updateUserProfile(user.getId(), updateDTO);
+//            return ResponseEntity.ok(new ApiResponse(true, "Profile updated successfully", updatedUser));
+//        } else {
+//            return ResponseEntity.status(401).body(new ApiResponse(false, "User not logged in"));
+//        }
     }
-
-
 }
