@@ -1,10 +1,12 @@
 import { fetchClient } from "./fetch";
 
+// eslint-disable-next-line react-refresh/only-export-components
 const SERVER = import.meta.env.VITE_SERVER_URL;
 
 const LOGIN_URL = `${SERVER}/user/login`;
 const REGISTER_URL = `${SERVER}/user/register`;
 const UPDATEPROFILE_URL = `${SERVER}/user/profile`;
+const GET_PROFILE_URL = `${SERVER}/user/profile`;
 
 const POST_URL = `${SERVER}/post`;
 
@@ -57,6 +59,10 @@ export async function updateProfile({
         bio,
         profileImg,
     });
+}
+
+export async function getProfile(username: string) {
+    return await fetchClient(GET_PROFILE_URL, "GET", null, username);
 }
 
 export async function getPost() {

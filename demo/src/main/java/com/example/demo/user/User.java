@@ -1,6 +1,9 @@
 package com.example.demo.user;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Objects;
 
 @Entity
@@ -9,6 +12,8 @@ import java.util.Objects;
         @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})
 })
+@Setter
+@Getter
 public class User {
 
     @Id
@@ -21,11 +26,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    
-
     @Column(nullable = false)
     private String password_hash;
 
+    @Setter
     @Column(nullable = false)
     private String full_name;
     @Column(nullable = false)
@@ -51,58 +55,6 @@ public class User {
         this.full_name = full_name;
         this.bio = bio;
         this.profile_image_url = profile_image_url;
-    }
-
-    public String getFull_name() {
-        return full_name;
-    }
-
-    public void setFull_name(String full_name) {
-        this.full_name = full_name;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public String getProfile_image_url() {
-        return profile_image_url;
-    }
-
-    public void setProfile_image_url(String profile_image_url) {
-        this.profile_image_url = profile_image_url;
-    }
-
-    public Long getId() {
-        return user_id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password_hash;
-    }
-
-    public void setPassword(String password) {
-        this.password_hash = password;
     }
 
     @Override

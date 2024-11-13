@@ -55,6 +55,6 @@ CREATE INDEX idx_likes_created_at ON likes(created_at);
 
 
 
+SELECT * FROM users
 
-
-
+DROP TABLE users CASCADE;

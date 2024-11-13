@@ -70,45 +70,42 @@ const Navigation = React.forwardRef<
 
 const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
     (props, ref) => {
+        const auth = useAuth();
+        const navigate = useNavigate();
+
+        const handleLogout = () => {
+            auth.logout();
+            navigate("/");
+        };
+
         return (
             <div
                 className={twMerge("flex items-center", props.className)}
                 ref={ref}
                 {...props}
             >
-                <AuthenticatedUser />
+                <DropdownMenu>
+                    <DropdownMenuTrigger>Profile</DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuLabel>Username: </DropdownMenuLabel>
+                        <DropdownMenuItem disabled>
+                            {auth.user?.username}
+                        </DropdownMenuItem>
+                        <Link to="/profileinfo">
+                            <DropdownMenuItem>Settings</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={handleLogout}
+                            className="hover:cursor-pointer"
+                        >
+                            Logout
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         );
     }
 );
-
-const AuthenticatedUser = () => {
-    const auth = useAuth();
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        auth.logout();
-        navigate("/");
-    };
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger>Profile</DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuLabel>Username: </DropdownMenuLabel>
-                <DropdownMenuItem disabled>
-                    {auth.user?.username}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="hover:cursor-pointer"
-                >
-                    Logout
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
 
 export default Header;

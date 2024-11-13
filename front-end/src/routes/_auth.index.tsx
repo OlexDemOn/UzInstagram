@@ -5,5 +5,5 @@ export const Route = createFileRoute("/_auth/")({
 });
 
 function App() {
-    return <div></div>;
+    return <div>test</div>;
 }

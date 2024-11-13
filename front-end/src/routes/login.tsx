@@ -29,8 +29,11 @@ import { useAuth } from "../../providers/AuthProvider";
 import { login } from "@/api/endpoints";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const fallback = "/" as const;
+
+const RECAPTCHA_KEY = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
 export const Route = createFileRoute("/login")({
     beforeLoad: ({ context, location }) => {
@@ -50,7 +53,7 @@ async function sleep(ms: number) {
 function Login() {
     return (
         <div className="flex flex-1 justify-center items-center w-full">
-            <Card className="w-80">
+            <Card className="w-96">
                 <CardHeader>
                     <CardTitle>Login</CardTitle>
                 </CardHeader>
@@ -86,7 +89,8 @@ const FormContainer = () => {
     const auth = useAuth();
     const router = useRouter();
     const navigate = useNavigate();
-
+    const [captcha, setCaptcha] = useState<string>("");
+    console.log(RECAPTCHA_KEY);
     const searchParams = new URLSearchParams(window.location.search);
     const redirectTo = searchParams.get("redirect") || fallback;
 
@@ -146,8 +150,14 @@ const FormContainer = () => {
                         </FormItem>
                     )}
                 />
+                <ReCAPTCHA
+                    className="w-full"
+                    sitekey={RECAPTCHA_KEY}
+                    onChange={(val) => setCaptcha(val)}
+                />
                 {error && <FormMessage typeof="error">{error}</FormMessage>}
                 <Button
+                    disabled={!captcha}
                     variant="secondary"
                     type="submit"
                     className="w-full mt-4"

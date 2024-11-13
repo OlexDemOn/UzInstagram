@@ -5,14 +5,23 @@ package com.example.demo.user;
 import com.example.demo.dto.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,6 +30,10 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+
+
 
     // Endpoint for user registration
     @PostMapping("/register")
@@ -44,7 +57,7 @@ public class AuthController {
                     userRegistrationDTO.getEmail(),
                     userRegistrationDTO.getPassword()
             );
-            UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
+            UserResponseDTO responseDTO = new UserResponseDTO(user.getUsername(), user.getEmail());
             ApiResponse response = new ApiResponse(true, "User registered successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -77,7 +90,7 @@ public class AuthController {
             // userLoginDTO.getUsernameOrEmail() can contain either username or email
             User user = userService.authenticateUser(userLoginDTO.getUsernameOrEmail(), userLoginDTO.getPassword());
             // Set user in session
-            UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
+            UserResponseDTO responseDTO = new UserResponseDTO(user.getUsername(), user.getEmail());
             ApiResponse response = new ApiResponse(true, "User logged in successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -86,48 +99,55 @@ public class AuthController {
         }
     }
 
-    // Endpoint to get the current logged-in user's profile
-//    @GetMapping("/profile")
-//    public ResponseEntity<ApiResponse> getUserProfile(HttpSession session) {
-//        User user = (User) session.getAttribute("user");
-//        if (user != null) {
-//            UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
-//            ApiResponse response = new ApiResponse(true, "User profile fetched successfully", responseDTO);
-//            return new ResponseEntity<>(response, HttpStatus.OK);
-//        } else {
-//            ApiResponse response = new ApiResponse(false, "User is not logged in");
-//            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-//        }
-//    }
 
-    @PutMapping("/profile")
-    public ResponseEntity<ApiResponse> updateUserProfile(@RequestBody UserProfileUpdateDTO updateDTO, BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getAllErrors().forEach((error) -> {
-                String fieldName = ((FieldError) error).getField();
-                String errorMessage = error.getDefaultMessage();
-                errors.put(fieldName, errorMessage);
-            });
-            ApiResponse response = new ApiResponse(false, "Validation Failed", errors);
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
+    @PutMapping(value = "/profile")
+    public ResponseEntity<ApiResponse> updateUserProfile(
+            @RequestHeader("Authorization") String username,
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String bio,
+            @RequestPart(name = "profileImg", required = false) MultipartFile profileImg) {
         try {
+            String contentType = profileImg.getContentType();
+            assert contentType != null;
+            if (!contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+                throw new IllegalArgumentException("Only JPEG or PNG images are allowed");
+            }
+
+            UserProfileUpdateDTO updateDTO = new UserProfileUpdateDTO(username, fullName, bio, profileImg);
             User user = userService.updateUserProfile(updateDTO);
-            UserResponseDTO responseDTO = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
-            ApiResponse response = new ApiResponse(true, "User logged in successfully", responseDTO);
+            UserResponseDTO responseDTO = new UserResponseDTO(user.getUsername(), user.getEmail());
+            ApiResponse response = new ApiResponse(true, "User updated in successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ApiResponse response = new ApiResponse(false, e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
-//        if (user != null) {
-//            User updatedUser = userService.updateUserProfile(user.getId(), updateDTO);
-//            return ResponseEntity.ok(new ApiResponse(true, "Profile updated successfully", updatedUser));
-//        } else {
-//            return ResponseEntity.status(401).body(new ApiResponse(false, "User not logged in"));
-//        }
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader(value="Authorization") String username) throws IOException {
+        if (username == null) {
+            ApiResponse response = new ApiResponse(false, "User is not logged in");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        User user = userRepository.findByUsername(username).get();
+
+        java.nio.file.Path filePath = Paths.get("uploads/avatar-"+username).resolve("avatar-"+username+".jpeg");
+
+        Resource resource = new UrlResource(filePath.toUri());
+        // return profile data with image
+        Map<String, String> profile = new HashMap<>();
+        profile.put("username", user.getUsername());
+        profile.put("email", user.getEmail());
+        profile.put("fullName", user.getFull_name());
+        profile.put("bio", user.getBio());
+        profile.put("profileImg", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(filePath)));
+
+
+        ApiResponse response = new ApiResponse(true, "User profile fetched successfully", profile);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }

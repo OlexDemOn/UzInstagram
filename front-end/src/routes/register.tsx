@@ -29,8 +29,11 @@ import { useAuth } from "../../providers/AuthProvider";
 import { register } from "@/api/endpoints";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const fallback = "/" as const;
+
+const RECAPTCHA_KEY = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
 export const Route = createFileRoute("/register")({
     beforeLoad: ({ context, location }) => {
@@ -50,7 +53,7 @@ async function sleep(ms: number) {
 function Login() {
     return (
         <div className="flex flex-1 justify-center items-center w-full">
-            <Card className="w-80">
+            <Card className="w-96">
                 <CardHeader>
                     <CardTitle>Registration</CardTitle>
                 </CardHeader>
@@ -86,6 +89,7 @@ const FormContainer = () => {
     const auth = useAuth();
     const router = useRouter();
     const navigate = useNavigate();
+    const [captcha, setCaptcha] = useState<string>("");
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -159,8 +163,14 @@ const FormContainer = () => {
                         </FormItem>
                     )}
                 />
+                <ReCAPTCHA
+                    className="w-full"
+                    sitekey={RECAPTCHA_KEY}
+                    onChange={(val) => setCaptcha(val)}
+                />
                 {error && <FormMessage type="error">{error}</FormMessage>}
                 <Button
+                    disabled={!captcha}
                     variant="secondary"
                     type="submit"
                     className="w-full mt-4"

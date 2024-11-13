@@ -2,14 +2,15 @@ export async function fetchClient(
     url: string,
     method: "POST" | "GET" | "DELETE" | "PUT",
     body?: object | null,
-    userId?: string
+    userName?: string
 ) {
     const response = await fetch(url, {
         method: method,
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${userId}`,
+            Authorization: `${userName}`,
         },
+
         body: body && JSON.stringify(body),
     });
 

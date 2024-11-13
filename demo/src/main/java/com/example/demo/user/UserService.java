@@ -5,7 +5,13 @@ import com.example.demo.user.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 @Service
@@ -13,6 +19,7 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    String uploadAvatarDir = "uploads/avatar";
 
 
     // Register a new user
@@ -39,14 +46,14 @@ public class UserService {
         User user = userOpt.get();
 
         // Verify password
-        if (!BCrypt.checkpw(password, user.getPassword())) {
+        if (!BCrypt.checkpw(password, user.getPassword_hash())) {
             throw new Exception("Invalid username/email or password");
         }
 
         return user;
     }
 
-    public User updateUserProfile(UserProfileUpdateDTO updateDTO) {
+    public User updateUserProfile(UserProfileUpdateDTO updateDTO) throws IOException {
         System.out.println("Updating user profile: " + updateDTO.getUsername());
         User user = userRepository.findByUsername(updateDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -57,14 +64,31 @@ public class UserService {
         if (updateDTO.getBio()!= null) {
             user.setBio(updateDTO.getBio());
         }
+
+
         if (updateDTO.getProfileImg()!= null) {
-            user.setProfile_image_url(updateDTO.getProfileImg());
+            System.out.println(updateDTO.getProfileImg());
+            String filePath = saveImage(updateDTO.getProfileImg(), updateDTO.getUsername());
+            user.setProfile_image_url(filePath);
         }
 
-//        user.setFull_name(updateDTO.getFullName());
-//        user.setBio(updateDTO.getBio());
-//        user.setProfile_image_url(updateDTO.getProfileImg());
+
 
         return userRepository.save(user); // Save the updated user profile
     }
+
+    // Save the profile image to the uploads/avatar directory with a unique filename
+    private String saveImage(MultipartFile file, String username) throws IOException {
+        Path uploadPath =  Paths.get(uploadAvatarDir+ "-"+username);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String newFileName = "avatar-" + username + ".jpeg"; // + file.getContentType().split("/")[1]
+        Path newFilePath = uploadPath.resolve(newFileName);
+        Files.copy(file.getInputStream(), newFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return newFilePath.toString();
+    }
+
 }
