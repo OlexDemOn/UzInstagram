@@ -13,14 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@tanstack/react-router";
 import { useAuth } from "../../providers/AuthProvider";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { getProfile, updateProfile } from "@/api/endpoints";
+import { getProfile } from "@/api/endpoints";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfile } from "types/users";
 
 export const Route = createFileRoute("/_auth/profileInfo")({
     component: UserInfo,
@@ -29,17 +29,17 @@ export const Route = createFileRoute("/_auth/profileInfo")({
 function UserInfo() {
     const auth = useAuth();
     const username = auth.user?.username || "";
-    const [userProfile, setUserProfile] = useState();
+    const [userProfile, setUserProfile] = useState<UserProfile>();
 
     useEffect(() => {
         const test = async () => {
             const response = await getProfile(username);
             setUserProfile(response);
+            console.log(response);
         };
         test();
     }, []);
 
-    console.log(userProfile);
     return (
         <div className="flex flex-1 justify-center items-center w-full gap-5">
             <Card className="w-80">
@@ -73,8 +73,8 @@ const FormContainer = ({
     userProfile,
     setUserProfile,
 }: {
-    userProfile: any;
-    setUserProfile: any;
+    userProfile: UserProfile;
+    setUserProfile;
 }) => {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -108,7 +108,7 @@ const FormContainer = ({
                 },
             });
             toast.success("Your profile has been updated");
-            setUserProfile((userProfile) => {
+            setUserProfile((userProfile: UserProfile) => {
                 return {
                     ...userProfile,
                     bio: values.bio,
@@ -117,7 +117,6 @@ const FormContainer = ({
                 };
             });
         } catch (error) {
-            console.log(error.message);
             setError(error.message);
         }
     }

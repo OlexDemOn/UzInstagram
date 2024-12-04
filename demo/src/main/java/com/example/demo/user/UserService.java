@@ -1,7 +1,5 @@
 package com.example.demo.user;
 
-import com.example.demo.user.User;
-import com.example.demo.user.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +19,6 @@ public class UserService {
     private UserRepository userRepository;
     String uploadAvatarDir = "uploads/avatar";
 
-
-    // Register a new user
     public User registerUser(String username, String email, String password) throws Exception {
         // Check if username or email is already taken
         Optional<User> existingUser = userRepository.findByUsernameOrEmail(username, email);
@@ -65,26 +61,22 @@ public class UserService {
             user.setBio(updateDTO.getBio());
         }
 
-
         if (updateDTO.getProfileImg()!= null) {
             System.out.println(updateDTO.getProfileImg());
             String filePath = saveImage(updateDTO.getProfileImg(), updateDTO.getUsername());
             user.setProfile_image_url(filePath);
         }
 
-
-
         return userRepository.save(user); // Save the updated user profile
     }
 
-    // Save the profile image to the uploads/avatar directory with a unique filename
     private String saveImage(MultipartFile file, String username) throws IOException {
         Path uploadPath =  Paths.get(uploadAvatarDir+ "-"+username);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String newFileName = "avatar-" + username + ".jpeg"; // + file.getContentType().split("/")[1]
+        String newFileName = "avatar-" + username + ".jpeg";
         Path newFilePath = uploadPath.resolve(newFileName);
         Files.copy(file.getInputStream(), newFilePath, StandardCopyOption.REPLACE_EXISTING);
 
