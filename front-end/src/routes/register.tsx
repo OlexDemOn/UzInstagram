@@ -37,7 +37,6 @@ const RECAPTCHA_KEY = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
 export const Route = createFileRoute("/register")({
     beforeLoad: ({ context, location }) => {
-        console.log("beforeLoad", location);
         // @ts-expect-error - auth is not in the types
         if (context?.auth.isAuthenticated) {
             throw redirect({ to: fallback });
@@ -103,17 +102,13 @@ const FormContainer = () => {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, username, password } = values;
         if (!email || !username || !password) return;
-        console.log(fallback);
         try {
             const response = await register({ email, username, password });
-            console.log(response);
             auth.login(response);
             await router.invalidate();
             await sleep(100);
             await navigate({ to: "/profileInfo" });
         } catch (error) {
-            console.log(error);
-            console.log("error");
             setError(error.message);
         }
     }

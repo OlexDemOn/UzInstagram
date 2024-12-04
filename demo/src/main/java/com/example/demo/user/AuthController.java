@@ -1,21 +1,16 @@
-// src/main/java/com/example/userapi/controller/AuthController.java
-
 package com.example.demo.user;
 
 import com.example.demo.dto.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -131,22 +126,36 @@ public class AuthController {
             ApiResponse response = new ApiResponse(false, "User is not logged in");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
+
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            ApiResponse response = new ApiResponse(false, "User isn't authenticated");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
         User user = userRepository.findByUsername(username).get();
 
         java.nio.file.Path filePath = Paths.get("uploads/avatar-"+username).resolve("avatar-"+username+".jpeg");
 
-        Resource resource = new UrlResource(filePath.toUri());
+
         // return profile data with image
         Map<String, String> profile = new HashMap<>();
         profile.put("username", user.getUsername());
         profile.put("email", user.getEmail());
         profile.put("fullName", user.getFull_name());
         profile.put("bio", user.getBio());
-        profile.put("profileImg", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(filePath)));
-
+        //check if that image is present
+        if (Files.exists(filePath)) {
+            System.out.println("test pass:");
+            profile.put("profileImg", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(filePath)));
+        } else {
+            System.out.println("test broke:");
+            profile.put("profileImg", "https://www.istockphoto.com/photos/user-profile-image");
+        }
 
         ApiResponse response = new ApiResponse(true, "User profile fetched successfully", profile);
         return new ResponseEntity<>(response, HttpStatus.OK);
+
+
     }
 
 

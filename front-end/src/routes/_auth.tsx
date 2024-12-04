@@ -5,7 +5,6 @@ import React from "react";
 
 export const Route = createFileRoute("/_auth")({
     beforeLoad: ({ context, location }) => {
-        console.log("beforeLoad", context);
         // @ts-expect-error - auth is not in the types
         if (!context?.auth?.isAuthenticated) {
             throw redirect({
