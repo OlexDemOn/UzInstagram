@@ -1,4 +1,5 @@
 package com.example.demo.post;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
-
 public class PostController {
     @Autowired
     private PostService postService;
@@ -32,5 +32,11 @@ public class PostController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Post>> getPostsByUserId(@PathVariable Long userId) {
+        List<Post> posts = postService.getPostsByUserId(userId);
+        return ResponseEntity.ok(posts); // Повертаємо всі пости користувача
     }
 }
