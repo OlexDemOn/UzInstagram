@@ -12,9 +12,6 @@ public class UserResponseDTO {
         this.email = email;
     }
 
-    // Getters
-
-
     public String getUsername() {
         return username;
     }

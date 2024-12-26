@@ -29,11 +29,11 @@ public class AuthController {
     private UserRepository userRepository;
 
 
+    Integer test = 5;
 
     // Endpoint for user registration
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO, BindingResult bindingResult) {
-        // Validation handled by GlobalExceptionHandler
         if (bindingResult.hasErrors()) {
             // Collect errors
             Map<String, String> errors = new HashMap<>();
@@ -82,9 +82,7 @@ public class AuthController {
         }
 
         try {
-            // userLoginDTO.getUsernameOrEmail() can contain either username or email
             User user = userService.authenticateUser(userLoginDTO.getUsernameOrEmail(), userLoginDTO.getPassword());
-            // Set user in session
             UserResponseDTO responseDTO = new UserResponseDTO(user.getUsername(), user.getEmail());
             ApiResponse response = new ApiResponse(true, "User logged in successfully", responseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -128,22 +126,21 @@ public class AuthController {
         }
 
 
-        if (userRepository.findByUsername(username).isPresent()) {
-            ApiResponse response = new ApiResponse(false, "User isn't authenticated");
+        if (userRepository.findByUsername(username).isEmpty()) {
+            ApiResponse response = new ApiResponse(false, "User isn't in database");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         User user = userRepository.findByUsername(username).get();
 
+
         java.nio.file.Path filePath = Paths.get("uploads/avatar-"+username).resolve("avatar-"+username+".jpeg");
 
 
-        // return profile data with image
         Map<String, String> profile = new HashMap<>();
         profile.put("username", user.getUsername());
         profile.put("email", user.getEmail());
         profile.put("fullName", user.getFull_name());
         profile.put("bio", user.getBio());
-        //check if that image is present
         if (Files.exists(filePath)) {
             System.out.println("test pass:");
             profile.put("profileImg", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(filePath)));

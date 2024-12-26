@@ -11,7 +11,6 @@ const GET_PROFILE_URL = `${SERVER}/user/profile`;
 const POST_URL = `${SERVER}/post`;
 
 export async function test() {
-    console.log(SERVER);
     return await fetchClient(`${SERVER}`, "GET");
 }
 
@@ -52,7 +51,6 @@ export async function updateProfile({
     bio: string;
     profileImg: string;
 }) {
-    console.log({ username, fullName, bio, profileImg });
     return await fetchClient(UPDATEPROFILE_URL, "PUT", {
         username,
         fullName,

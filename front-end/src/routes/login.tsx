@@ -37,7 +37,6 @@ const RECAPTCHA_KEY = import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY;
 
 export const Route = createFileRoute("/login")({
     beforeLoad: ({ context, location }) => {
-        console.log("beforeLoad", location);
         // @ts-expect-error - auth is not in the types
         if (context?.auth.isAuthenticated) {
             throw redirect({ to: fallback });
@@ -90,7 +89,6 @@ const FormContainer = () => {
     const router = useRouter();
     const navigate = useNavigate();
     const [captcha, setCaptcha] = useState<string>("");
-    console.log(RECAPTCHA_KEY);
     const searchParams = new URLSearchParams(window.location.search);
     const redirectTo = searchParams.get("redirect") || fallback;
 
@@ -113,7 +111,6 @@ const FormContainer = () => {
             await sleep(100);
             await navigate({ to: redirectTo });
         } catch (error) {
-            console.log(error.message);
             setError(error.message);
         }
     }

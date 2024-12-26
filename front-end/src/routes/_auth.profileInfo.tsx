@@ -35,7 +35,7 @@ function UserInfo() {
         const test = async () => {
             const response = await getProfile(username);
             setUserProfile(response);
-            console.log(response);
+            console.log(userProfile);
         };
         test();
     }, []);
@@ -168,7 +168,6 @@ const FormContainer = ({
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
                     name="bio"
