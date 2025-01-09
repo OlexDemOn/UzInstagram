@@ -29,7 +29,6 @@ public class User {
     @Column(nullable = false)
     private String password_hash;
 
-    @Setter
     @Column(nullable = false)
     private String full_name;
     @Column(nullable = false)

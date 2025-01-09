@@ -1,5 +1,6 @@
 package com.example.demo.user;
 
+import com.example.demo.imgHandle.SaveImage;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    String uploadAvatarDir = "uploads/avatar";
 
     public User registerUser(String username, String email, String password) throws Exception {
         // Check if username or email is already taken
@@ -63,24 +63,10 @@ public class UserService {
 
         if (updateDTO.getProfileImg()!= null) {
             System.out.println(updateDTO.getProfileImg());
-            String filePath = saveImage(updateDTO.getProfileImg(), updateDTO.getUsername());
+            String filePath = SaveImage.saveAvatarImage(updateDTO.getProfileImg(), updateDTO.getUsername());
             user.setProfile_image_url(filePath);
         }
 
         return userRepository.save(user); // Save the updated user profile
     }
-
-    private String saveImage(MultipartFile file, String username) throws IOException {
-        Path uploadPath =  Paths.get(uploadAvatarDir+ "-"+username);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String newFileName = "avatar-" + username + ".jpeg";
-        Path newFilePath = uploadPath.resolve(newFileName);
-        Files.copy(file.getInputStream(), newFilePath, StandardCopyOption.REPLACE_EXISTING);
-
-        return newFilePath.toString();
-    }
-
 }

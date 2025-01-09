@@ -1,33 +1,34 @@
 package com.example.demo.post;
 
+import com.example.demo.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "posts")
+@Setter
+@Getter
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String username; // Ім'я користувача,
+    private String imageUrl;
 
-    @Column(nullable = false)
-    private String content;  // Вміст поста
+    private String title;
 
-    private String image;    //  шлях до зображення
+    private String description;
 
-    @Column(nullable = false)
-    private LocalDate datePost; // Дата створення поста
+    @Column(nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt = new Date();
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // Зв'язок із користувачем
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
 }

@@ -1,14 +1,14 @@
 package com.example.demo.post;
 
+import com.example.demo.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    List<Post> findByUsername(String username);
-    List<Post> findByUserId(Long userId); // для пошуку постів конкретного користувача
+    Page<Post> findAllByOrderByCreatedAtDesc(PageRequest pageable);
+
+    List<Post> findAllByUser(User user);
 }
-
-
