@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export const Route = createRootRoute({
     component: () => (
-        <div className="flex relative flex-1">
+        <div className="flex relative flex-1 p-5">
             <Outlet />
             <ToastContainer
                 position="bottom-left"

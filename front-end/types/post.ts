@@ -1,9 +1,11 @@
 export type TPost = {
     id: number;
     title: string;
-    img_url: string;
-    body: string;
+    description: string;
+    imageUrl: string;
+    username: string;
+    profileImageUrl: string;
+    createdAt: string;
+    likesCount: number;
+    likedByCurrentUser: boolean;
 };
-
-
-  

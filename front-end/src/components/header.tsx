@@ -12,6 +12,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const menuItems = [
+    { label: "Main", href: "/" },
+    { label: "Create post", href: "/createPost" },
+    // { label: "Logout", href: "/logout" },
+];
+
 const Header = React.forwardRef<
     HTMLDivElement,
     React.HTMLProps<HTMLDivElement>
@@ -62,8 +68,15 @@ const Navigation = React.forwardRef<
             ref={ref}
             {...props}
         >
-            <Link to="/">Main</Link>
-            <Link to="/contest">Contest</Link>
+            {menuItems.map((item, index) => (
+                <Link
+                    className="hover:text-primary transition-all"
+                    key={index}
+                    to={item.href}
+                >
+                    {item.label}
+                </Link>
+            ))}
         </nav>
     );
 });
@@ -85,14 +98,20 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
                 {...props}
             >
                 <DropdownMenu>
-                    <DropdownMenuTrigger>Profile</DropdownMenuTrigger>
+                    <DropdownMenuTrigger className="hover:text-primary transition-all">
+                        Profile
+                    </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>Username: </DropdownMenuLabel>
-                        <DropdownMenuItem disabled>
-                            {auth.user?.username}
-                        </DropdownMenuItem>
+                        <Link to="/profile">
+                            <DropdownMenuItem className="hover:cursor-pointer">
+                                {auth.user?.username}
+                            </DropdownMenuItem>
+                        </Link>
                         <Link to="/profileinfo">
-                            <DropdownMenuItem>Settings</DropdownMenuItem>
+                            <DropdownMenuItem className="hover:cursor-pointer">
+                                Settings
+                            </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem

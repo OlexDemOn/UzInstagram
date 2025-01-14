@@ -35,7 +35,6 @@ function UserInfo() {
         const test = async () => {
             const response = await getProfile(username);
             setUserProfile(response);
-            console.log(response);
         };
         test();
     }, []);

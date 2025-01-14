@@ -52,7 +52,6 @@ export async function updateProfile({
     bio: string;
     profileImg: string;
 }) {
-    console.log({ username, fullName, bio, profileImg });
     return await fetchClient(UPDATEPROFILE_URL, "PUT", {
         username,
         fullName,
