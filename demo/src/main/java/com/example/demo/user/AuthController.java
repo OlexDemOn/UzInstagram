@@ -131,6 +131,8 @@ public class AuthController {
         profile.put("email", user.getEmail());
         profile.put("fullName", user.getFull_name());
         profile.put("bio", user.getBio());
+        profile.put("followers", String.valueOf(user.getFollowers()));
+        profile.put("following", String.valueOf(user.getFollowing()));
 
         if (Files.exists(filePath)) {
             System.out.println("test pass:");

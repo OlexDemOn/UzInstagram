@@ -54,17 +54,17 @@ const Index = () => {
     }, [page]);
 
     const handleScroll = () => {
-        if (
-            window.innerHeight + document.documentElement.scrollTop >=
-            document.documentElement.offsetHeight - 200
-        ) {
-            console.log("fetching more posts");
-            setPage((prev) => prev + 1);
-        }
         if (window.scrollY > 200) {
             setIsVisible(true);
         } else {
             setIsVisible(false);
+        }
+        if (loading || !hasMore) return;
+        if (
+            window.innerHeight + document.documentElement.scrollTop >=
+            document.documentElement.offsetHeight - 200
+        ) {
+            setPage((prev) => prev + 1);
         }
     };
 
@@ -82,7 +82,10 @@ const Index = () => {
             {posts.map((post: TPost) => (
                 <PostContainer key={post.id} post={post}>
                     <div className="flex items-center gap-2">
-                        <AvatarContainer post={post} />
+                        <AvatarContainer
+                            username={post.username}
+                            imgUrl={post.profileImageUrl}
+                        />
                         <p>{post.username}</p>
                     </div>
                     <ImageContainer post={post} />

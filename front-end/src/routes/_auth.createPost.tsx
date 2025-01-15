@@ -18,6 +18,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_auth/createPost")({
     component: () => <CreatePost />,
@@ -26,6 +33,7 @@ export const Route = createFileRoute("/_auth/createPost")({
 const formSchema = z.object({
     title: z.string().min(2),
     imageUrl: z.instanceof(File).optional(),
+    postType: z.boolean(),
     description: z.string(),
 });
 
@@ -41,18 +49,19 @@ const CreatePost = () => {
         defaultValues: {
             title: "",
             imageUrl: null,
+            postType: true,
             description: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const { title, imageUrl, description } = values;
-
+        const { title, imageUrl, postType, description } = values;
+        // console.log(values);
         try {
             await axios
                 .put(
                     "http://localhost:5000/api/posts",
-                    { title, imageUrl, description },
+                    { title, imageUrl, postType, description },
                     {
                         headers: {
                             "Content-Type": "multipart/form-data",
@@ -145,6 +154,36 @@ const CreatePost = () => {
 
                     <FormField
                         control={form.control}
+                        name="postType"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Post type</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        onValueChange={(value) =>
+                                            field.onChange(value === "true")
+                                        }
+                                        defaultValue="true"
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Post type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="false">
+                                                Private
+                                            </SelectItem>
+                                            <SelectItem value="true">
+                                                Public
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
                         name="description"
                         render={({ field }) => (
                             <FormItem>
@@ -157,6 +196,7 @@ const CreatePost = () => {
                         )}
                     />
                     {error && <FormMessage type="error">{error}</FormMessage>}
+
                     <Button variant="secondary" type="submit">
                         Create post
                     </Button>

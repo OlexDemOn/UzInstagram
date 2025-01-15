@@ -1,5 +1,6 @@
 package com.example.demo.post;
 
+import com.example.demo.post.comment.Comment;
 import com.example.demo.post.like.Likes;
 import com.example.demo.user.User;
 import jakarta.persistence.*;
@@ -25,6 +26,9 @@ public class Post {
 
     private String description;
 
+    @Column(nullable = false)
+    private boolean opened;
+
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
@@ -35,6 +39,9 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
 
 }

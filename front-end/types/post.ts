@@ -8,4 +8,5 @@ export type TPost = {
     createdAt: string;
     likesCount: number;
     likedByCurrentUser: boolean;
+    opened: boolean;
 };

@@ -1,9 +1,10 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     ComponentPropsWithoutRef,
     ElementRef,
     forwardRef,
+    useEffect,
     useState,
 } from "react";
 import {
@@ -17,6 +18,11 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { TPost } from "types/post";
 import axios from "axios";
 import { useAuth } from "../../providers/AuthProvider";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
+import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 
 export const PostContainer = forwardRef<
     ElementRef<"div">,
@@ -26,24 +32,56 @@ export const PostContainer = forwardRef<
 >(({ post, children, className, ...props }, ref) => {
     const auth = useAuth();
     const username = auth.user?.username || "";
+    const [isBookmarked, setIsBookmarked] = useState();
+
+    useEffect(() => {
+        const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+        setIsBookmarked(bookmarks.includes(post.id));
+    }, []);
+
+    const handleBookmark = () => {
+        let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+        if (isBookmarked) {
+            bookmarks = bookmarks.filter((id) => id !== post.id);
+        } else {
+            bookmarks.push(post.id);
+        }
+        localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+        setIsBookmarked((prev) => !prev);
+    };
 
     return (
         <Card
-            className={`min-h-60 w-full flex flex-col gap-5 p-5 ${className}`}
+            className={`relative min-h-60 w-full flex flex-col gap-5 p-5 ${className}`}
             ref={ref}
             {...props}
         >
             {children}
             <Collapsible>
-                <div className="flex items-center gap-2">
-                    <Likes post={post} username={username} />
-                    <CollapsibleTrigger>
-                        <FiMessageCircle size={24} />
-                    </CollapsibleTrigger>
+                <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <Likes post={post} username={username} />
+                        <CollapsibleTrigger>
+                            <FiMessageCircle size={24} />
+                        </CollapsibleTrigger>
+                    </div>
+                    <Badge variant={post.opened ? "secondary" : "default"}>
+                        {post.opened ? "Public" : "Private"}
+                    </Badge>
                 </div>
-                <Comments post={post} />
+                <Comments post={post} username={username} />
                 {/* </div> */}
             </Collapsible>
+            <div
+                className="absolute top-5 right-5 cursor-pointer"
+                onClick={handleBookmark}
+            >
+                {isBookmarked ? (
+                    <FaBookmark size={24} />
+                ) : (
+                    <FaRegBookmark size={24} />
+                )}
+            </div>
         </Card>
     );
 });
@@ -51,14 +89,17 @@ export const PostContainer = forwardRef<
 export const AvatarContainer = forwardRef<
     ElementRef<"div">,
     ComponentPropsWithoutRef<"div"> & {
-        post: TPost;
+        imgUrl: string;
+        username?: string;
     }
->(({ post, className, ...props }, ref) => {
+>(({ imgUrl, username, className, ...props }, ref) => {
     return (
-        <Avatar className={className} {...props} ref={ref}>
-            <AvatarImage className="bg-cover" src={post.profileImageUrl} />
-            <AvatarFallback>{post.username[0]}</AvatarFallback>
-        </Avatar>
+        <Link to={`/profile/${username}`}>
+            <Avatar className={className} {...props} ref={ref}>
+                <AvatarImage className="bg-cover" src={imgUrl} />
+                <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+        </Link>
     );
 });
 
@@ -75,11 +116,8 @@ export const ImageContainer = forwardRef<
             ref={ref}
         >
             <p>{post.title}</p>
-            {post.imageUrl !== "" ? (
-                <img src={post.imageUrl} alt="Post" />
-            ) : (
-                <>{post.description}</>
-            )}
+            {post.imageUrl !== "" && <img src={post.imageUrl} alt="Post" />}
+            <>{post.description}</>
         </div>
     );
 });
@@ -111,6 +149,7 @@ export const Likes = forwardRef<
                 }
             )
             .then((response) => {
+                console.log(response);
                 if (liked) {
                     setLikesCount((prev) => prev - 1);
                     setLiked(false);
@@ -123,7 +162,6 @@ export const Likes = forwardRef<
                 console.error("Error liking post:", error);
             });
     };
-
     return (
         <div
             className={`flex items-center w-fit gap-2 hover:cursor-pointer size-12 ${className}`}
@@ -145,12 +183,89 @@ export const Comments = forwardRef<
     ElementRef<"div">,
     ComponentPropsWithoutRef<"div"> & {
         post: TPost;
+        username: string;
     }
->(({ post, className, ...props }, ref) => {
+>(({ post, username, className, ...props }, ref) => {
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        axios
+            .get(`http://localhost:5000/api/posts/${post.id}/comments`)
+            .then((response) => {
+                setComments(response.data.data);
+            })
+            .catch((error) => console.error(error));
+    }, [post.id]);
+
+    // Handle adding a new comment
+    const handleAddComment = async () => {
+        if (!newComment.trim()) return;
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                `http://localhost:5000/api/posts/${post.id}/comments`,
+                {
+                    username: username,
+                    content: newComment,
+                }
+            );
+            if (comments == null || comments.length === 0) {
+                setComments([response.data]);
+            } else {
+                setComments((prev) => [...prev, response.data]);
+            }
+            setNewComment("");
+        } catch (error) {
+            console.error("Error adding comment:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <CollapsibleContent>
-            Yes. Free to use for personal and commercial projects. No
-            attribution required.
+            <div className="space-y-5 mb-5">
+                {comments && comments.length > 0 ? (
+                    comments.map((comment) => (
+                        <div key={comment.id} className="flex gap-2">
+                            <AvatarContainer
+                                imgUrl={comment.ownerProfileImageUrl}
+                                username={comment.ownerUsername}
+                            />
+                            <div>
+                                {comment.ownerUsername}
+                                <p className="text-sm text-muted-foreground">
+                                    {comment.content}
+                                </p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-muted-foreground">
+                        No comments yet. Be the first to comment!
+                    </p>
+                )}
+            </div>
+
+            {/* Add Comment Section */}
+            <div className="space-y-2">
+                <Textarea
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="w-full"
+                    disabled={loading}
+                />
+                <Button
+                    onClick={handleAddComment}
+                    disabled={loading || !newComment.trim()}
+                    className="w-full"
+                >
+                    {loading ? "Posting..." : "Post Comment"}
+                </Button>
+            </div>
         </CollapsibleContent>
     );
 });

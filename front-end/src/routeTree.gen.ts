@@ -15,9 +15,10 @@ import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthIndexImport } from './routes/_auth.index'
+import { Route as AuthSavedImport } from './routes/_auth.saved'
 import { Route as AuthProfileInfoImport } from './routes/_auth.profileInfo'
-import { Route as AuthProfileImport } from './routes/_auth.profile'
 import { Route as AuthCreatePostImport } from './routes/_auth.createPost'
+import { Route as AuthProfileUsernameImport } from './routes/_auth.profile.$username'
 
 // Create/Update Routes
 
@@ -41,18 +42,23 @@ const AuthIndexRoute = AuthIndexImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthSavedRoute = AuthSavedImport.update({
+  path: '/saved',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthProfileInfoRoute = AuthProfileInfoImport.update({
   path: '/profileInfo',
   getParentRoute: () => AuthRoute,
 } as any)
 
-const AuthProfileRoute = AuthProfileImport.update({
-  path: '/profile',
+const AuthCreatePostRoute = AuthCreatePostImport.update({
+  path: '/createPost',
   getParentRoute: () => AuthRoute,
 } as any)
 
-const AuthCreatePostRoute = AuthCreatePostImport.update({
-  path: '/createPost',
+const AuthProfileUsernameRoute = AuthProfileUsernameImport.update({
+  path: '/profile/$username',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -88,18 +94,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCreatePostImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/profile': {
-      id: '/_auth/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthProfileImport
-      parentRoute: typeof AuthImport
-    }
     '/_auth/profileInfo': {
       id: '/_auth/profileInfo'
       path: '/profileInfo'
       fullPath: '/profileInfo'
       preLoaderRoute: typeof AuthProfileInfoImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/saved': {
+      id: '/_auth/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof AuthSavedImport
       parentRoute: typeof AuthImport
     }
     '/_auth/': {
@@ -109,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/profile/$username': {
+      id: '/_auth/profile/$username'
+      path: '/profile/$username'
+      fullPath: '/profile/$username'
+      preLoaderRoute: typeof AuthProfileUsernameImport
+      parentRoute: typeof AuthImport
+    }
   }
 }
 
@@ -116,16 +129,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthCreatePostRoute: typeof AuthCreatePostRoute
-  AuthProfileRoute: typeof AuthProfileRoute
   AuthProfileInfoRoute: typeof AuthProfileInfoRoute
+  AuthSavedRoute: typeof AuthSavedRoute
   AuthIndexRoute: typeof AuthIndexRoute
+  AuthProfileUsernameRoute: typeof AuthProfileUsernameRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthCreatePostRoute: AuthCreatePostRoute,
-  AuthProfileRoute: AuthProfileRoute,
   AuthProfileInfoRoute: AuthProfileInfoRoute,
+  AuthSavedRoute: AuthSavedRoute,
   AuthIndexRoute: AuthIndexRoute,
+  AuthProfileUsernameRoute: AuthProfileUsernameRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -135,18 +150,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/createPost': typeof AuthCreatePostRoute
-  '/profile': typeof AuthProfileRoute
   '/profileInfo': typeof AuthProfileInfoRoute
+  '/saved': typeof AuthSavedRoute
   '/': typeof AuthIndexRoute
+  '/profile/$username': typeof AuthProfileUsernameRoute
 }
 
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/createPost': typeof AuthCreatePostRoute
-  '/profile': typeof AuthProfileRoute
   '/profileInfo': typeof AuthProfileInfoRoute
+  '/saved': typeof AuthSavedRoute
   '/': typeof AuthIndexRoute
+  '/profile/$username': typeof AuthProfileUsernameRoute
 }
 
 export interface FileRoutesById {
@@ -155,9 +172,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_auth/createPost': typeof AuthCreatePostRoute
-  '/_auth/profile': typeof AuthProfileRoute
   '/_auth/profileInfo': typeof AuthProfileInfoRoute
+  '/_auth/saved': typeof AuthSavedRoute
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/profile/$username': typeof AuthProfileUsernameRoute
 }
 
 export interface FileRouteTypes {
@@ -167,20 +185,29 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/createPost'
-    | '/profile'
     | '/profileInfo'
+    | '/saved'
     | '/'
+    | '/profile/$username'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/createPost' | '/profile' | '/profileInfo' | '/'
+  to:
+    | '/login'
+    | '/register'
+    | '/createPost'
+    | '/profileInfo'
+    | '/saved'
+    | '/'
+    | '/profile/$username'
   id:
     | '__root__'
     | '/_auth'
     | '/login'
     | '/register'
     | '/_auth/createPost'
-    | '/_auth/profile'
     | '/_auth/profileInfo'
+    | '/_auth/saved'
     | '/_auth/'
+    | '/_auth/profile/$username'
   fileRoutesById: FileRoutesById
 }
 
@@ -217,9 +244,10 @@ export const routeTree = rootRoute
       "filePath": "_auth.tsx",
       "children": [
         "/_auth/createPost",
-        "/_auth/profile",
         "/_auth/profileInfo",
-        "/_auth/"
+        "/_auth/saved",
+        "/_auth/",
+        "/_auth/profile/$username"
       ]
     },
     "/login": {
@@ -232,16 +260,20 @@ export const routeTree = rootRoute
       "filePath": "_auth.createPost.tsx",
       "parent": "/_auth"
     },
-    "/_auth/profile": {
-      "filePath": "_auth.profile.tsx",
-      "parent": "/_auth"
-    },
     "/_auth/profileInfo": {
       "filePath": "_auth.profileInfo.tsx",
       "parent": "/_auth"
     },
+    "/_auth/saved": {
+      "filePath": "_auth.saved.tsx",
+      "parent": "/_auth"
+    },
     "/_auth/": {
       "filePath": "_auth.index.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/profile/$username": {
+      "filePath": "_auth.profile.$username.tsx",
       "parent": "/_auth"
     }
   }

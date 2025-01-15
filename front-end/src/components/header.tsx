@@ -11,11 +11,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { FaNetworkWired } from "react-icons/fa";
 const menuItems = [
     { label: "Main", href: "/" },
     { label: "Create post", href: "/createPost" },
-    // { label: "Logout", href: "/logout" },
+    { label: "Saved posts", href: "/saved" },
 ];
 
 const Header = React.forwardRef<
@@ -25,15 +25,17 @@ const Header = React.forwardRef<
     return (
         <header
             className={twMerge(
-                "flex items-center sticky w-full z-50 bg-background top-0 h-16 p-4 ",
+                "flex items-center justify-between sticky w-full z-50 bg-background top-0 h-16 p-4",
                 props.className
             )}
             ref={ref}
             {...props}
         >
             <Logo />
-            <Navigation />
-            <div className="flex gap-x-4">
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+                <Navigation />
+            </div>
+            <div className="flex gap-x-4 w-30">
                 <ModeToggle />
                 <User />
             </div>
@@ -45,11 +47,14 @@ const Logo = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
     (props, ref) => {
         return (
             <div
-                className={twMerge("flex items-center", props.className)}
+                className={twMerge("flex items-center w-40", props.className)}
                 ref={ref}
                 {...props}
             >
-                <span className="font-semibold">Logo</span>
+                <span className="font-semibold flex items-center gap-x-2">
+                    <FaNetworkWired size={30} />
+                    Social Network
+                </span>
             </div>
         );
     }
@@ -62,7 +67,7 @@ const Navigation = React.forwardRef<
     return (
         <nav
             className={twMerge(
-                "flex flex-1 w-10 items-center gap-x-3 justify-center",
+                "flex items-center gap-x-3 justify-center",
                 props.className
             )}
             ref={ref}
@@ -89,6 +94,7 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
         const handleLogout = () => {
             auth.logout();
             navigate("/");
+            window.location.reload();
         };
 
         return (
@@ -103,7 +109,7 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>Username: </DropdownMenuLabel>
-                        <Link to="/profile">
+                        <Link to={`/profile/${auth.user?.username}`}>
                             <DropdownMenuItem className="hover:cursor-pointer">
                                 {auth.user?.username}
                             </DropdownMenuItem>

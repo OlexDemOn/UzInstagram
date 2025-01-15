@@ -191,9 +191,7 @@ const FormContainer = ({
                         Skip
                     </Button>
                     <Separator orientation="vertical" />
-                    <Button variant="secondary" type="submit">
-                        Update
-                    </Button>
+                    <Button type="submit">Update</Button>
                 </div>
             </form>
         </Form>
