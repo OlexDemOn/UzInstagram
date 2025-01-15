@@ -82,6 +82,9 @@ public class UserService {
     }
 
     public void unfollowUser(String username, String followUsername) {
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
         User userToUnfollow = userRepository.findByUsername(followUsername)
@@ -95,6 +98,9 @@ public class UserService {
     }
 
     public boolean isFollowing(String username, String followUsername) {
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
         User userToCheck = userRepository.findByUsername(followUsername)
@@ -104,10 +110,15 @@ public class UserService {
     }
 
     public boolean isFollowingEachOther(String username, String followUsername){
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
         User user = userRepository.findByUsername(username)
                .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
         User userToCheck = userRepository.findByUsername(followUsername)
                .orElseThrow(() -> new RuntimeException("User not found with id: " + followUsername));
+
+
 
         return user.getFollowing().contains(userToCheck) && userToCheck.getFollowing().contains(user);
     }

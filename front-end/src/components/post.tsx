@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export const PostContainer = forwardRef<
     ElementRef<"div">,
@@ -33,6 +34,7 @@ export const PostContainer = forwardRef<
     const auth = useAuth();
     const username = auth.user?.username || "";
     const [isBookmarked, setIsBookmarked] = useState();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
@@ -66,7 +68,7 @@ export const PostContainer = forwardRef<
                         </CollapsibleTrigger>
                     </div>
                     <Badge variant={post.opened ? "secondary" : "default"}>
-                        {post.opened ? "Public" : "Private"}
+                        {post.opened ? t("public") : t("private")}
                     </Badge>
                 </div>
                 <Comments post={post} username={username} />
@@ -149,7 +151,6 @@ export const Likes = forwardRef<
                 }
             )
             .then((response) => {
-                console.log(response);
                 if (liked) {
                     setLikesCount((prev) => prev - 1);
                     setLiked(false);

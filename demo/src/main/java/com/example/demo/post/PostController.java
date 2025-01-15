@@ -8,12 +8,12 @@ import com.example.demo.post.comment.CommentRequest;
 import com.example.demo.post.comment.CommentService;
 import com.example.demo.post.like.LikesService;
 import com.example.demo.user.User;
-import com.example.demo.user.UserController;
 import com.example.demo.user.UserRepository;
 import com.example.demo.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -201,7 +201,6 @@ public class PostController {
     }
 
     @PostMapping("/byId")
-
     public ResponseEntity<ApiResponse> getPostByIds( @RequestHeader(value="Authorization") String username, @RequestBody(required = true) List<Long> ids) {
 
         User user = userRepository.findByUsername(username)
@@ -316,6 +315,20 @@ public class PostController {
         return ResponseEntity.ok(commentDTO);
     }
 
+//    findTop10ByLikes
+    @GetMapping("/top10")
+    public ResponseEntity<ApiResponse> get(@RequestHeader(value="Authorization") String username) {
+
+        Pageable pageable = PageRequest.of(0, 10); // Top 10
+        List<Post> posts = postRepository.findTop10PostsByLikes(pageable);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        PostService postService = new PostService();
+        ApiResponse response = new ApiResponse(true, "User profile fetched successfully", postService.filterAvailablePosts(posts, user));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<ApiResponse> getComments(@PathVariable Long postId) {

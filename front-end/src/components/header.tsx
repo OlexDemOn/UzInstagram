@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { twMerge } from "tailwind-merge";
-import { ModeToggle } from "./mode-toggle";
+import { LanguageToggle, ModeToggle } from "./mode-toggle";
 import { useAuth } from "../../providers/AuthProvider";
 import {
     DropdownMenu,
@@ -12,11 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FaNetworkWired } from "react-icons/fa";
-const menuItems = [
-    { label: "Main", href: "/" },
-    { label: "Create post", href: "/createPost" },
-    { label: "Saved posts", href: "/saved" },
-];
+import { useTranslation } from "react-i18next";
 
 const Header = React.forwardRef<
     HTMLDivElement,
@@ -37,6 +33,7 @@ const Header = React.forwardRef<
             </div>
             <div className="flex gap-x-4 w-30">
                 <ModeToggle />
+                <LanguageToggle />
                 <User />
             </div>
         </header>
@@ -64,6 +61,15 @@ const Navigation = React.forwardRef<
     HTMLDivElement,
     React.HTMLProps<HTMLDivElement>
 >((props, ref) => {
+    const { t } = useTranslation();
+
+    const menuItems = [
+        { label: t("menu_main"), href: "/" },
+        { label: t("menu_create"), href: "/createPost" },
+        { label: t("menu_save"), href: "/saved" },
+        { label: t("Top ten"), href: "/topTen" },
+    ];
+
     return (
         <nav
             className={twMerge(
@@ -90,6 +96,7 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
     (props, ref) => {
         const auth = useAuth();
         const navigate = useNavigate();
+        const { t } = useTranslation();
 
         const handleLogout = () => {
             auth.logout();
@@ -105,10 +112,10 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
             >
                 <DropdownMenu>
                     <DropdownMenuTrigger className="hover:text-primary transition-all">
-                        Profile
+                        {t("profile")}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuLabel>Username: </DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("username")} </DropdownMenuLabel>
                         <Link to={`/profile/${auth.user?.username}`}>
                             <DropdownMenuItem className="hover:cursor-pointer">
                                 {auth.user?.username}
@@ -116,7 +123,7 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
                         </Link>
                         <Link to="/profileinfo">
                             <DropdownMenuItem className="hover:cursor-pointer">
-                                Settings
+                                {t("settings")}
                             </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
@@ -124,7 +131,7 @@ const User = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
                             onClick={handleLogout}
                             className="hover:cursor-pointer"
                         >
-                            Logout
+                            {t("logout")}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

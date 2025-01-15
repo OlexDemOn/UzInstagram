@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import type { TProfile } from "types/users";
 import type { TPost } from "types/post";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_auth/profile/$username")({
     component: () => <Index />,
@@ -28,7 +29,7 @@ const Index = () => {
     const { username } = Route.useParams();
     const auth = useAuth();
     const currentUsername = auth.user?.username || "";
-
+    const { t } = useTranslation();
     const fetchPosts = async () => {
         setLoading(true);
         try {
@@ -54,11 +55,10 @@ const Index = () => {
         fetchPosts();
     }, []);
 
-    console.log(data);
     return (
         <div className="max-w-[600px] mx-auto">
             {loading ? (
-                <p>Loading...</p>
+                <p>{t("loading")}</p>
             ) : (
                 data && (
                     <div>
@@ -72,21 +72,21 @@ const Index = () => {
                                         {" "}
                                         {data.posts.length}
                                     </p>
-                                    <p>Posts</p>
+                                    <p>{t("posts")}</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-2">
                                     <p className="font-bold text-xl">
                                         {" "}
                                         {followers}
                                     </p>
-                                    <p>followers</p>
+                                    <p>{t("followers")}</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-2">
                                     <p className="font-bold text-xl">
                                         {" "}
                                         {following}
                                     </p>
-                                    <p>following</p>
+                                    <p>{t("following")}</p>
                                 </div>
                             </div>
                             <div>
@@ -129,7 +129,7 @@ const ControlPanel = ({
     setFollowing: React.Dispatch<React.SetStateAction<number>>;
 }) => {
     const [isFollowing, setIsFollowing] = useState(false);
-
+    const { t } = useTranslation();
     const followUser = async () => {
         try {
             let link = `follow`;
@@ -146,7 +146,6 @@ const ControlPanel = ({
                 setFollowers((prev) => parseInt(prev) + 1);
             }
             setIsFollowing(!isFollowing);
-            console.log(response);
         } catch (error) {
             console.error("Error following user:", error);
         }
@@ -166,12 +165,12 @@ const ControlPanel = ({
     useEffect(() => {
         isUserFollowProfile();
     }, []);
-    console.log(isFollowing);
+
     return (
         <div>
             {currentUsername === username ? (
                 <Link to="/profileinfo">
-                    <Button>Edit Profile</Button>
+                    <Button>{t("edit_profile")}</Button>
                 </Link>
             ) : (
                 <Button

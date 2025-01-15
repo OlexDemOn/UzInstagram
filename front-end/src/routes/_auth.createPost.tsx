@@ -25,6 +25,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_auth/createPost")({
     component: () => <CreatePost />,
@@ -43,6 +44,7 @@ const CreatePost = () => {
     const navigate = useNavigate();
     const auth = useAuth();
     const username = auth.user?.username || "";
+    const { t } = useTranslation();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -79,10 +81,9 @@ const CreatePost = () => {
             setError(error.message);
         }
     }
-
     return (
         <Card className="max-w-md mx-auto p-4">
-            <h1 className="text-xl font-bold mb-4">Create a Post</h1>
+            <h1 className="text-xl font-bold mb-4">{t("menu_create")}</h1>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -93,7 +94,7 @@ const CreatePost = () => {
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Title</FormLabel>
+                                <FormLabel>{t("title")}</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -107,7 +108,7 @@ const CreatePost = () => {
                         name="imageUrl"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Post img</FormLabel>
+                                <FormLabel>{t("post_img")}</FormLabel>
                                 <div className="flex flex-col gap-3">
                                     <FormControl>
                                         <Input
@@ -157,7 +158,7 @@ const CreatePost = () => {
                         name="postType"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Post type</FormLabel>
+                                <FormLabel>{t("post_type")}</FormLabel>
                                 <FormControl>
                                     <Select
                                         onValueChange={(value) =>
@@ -170,10 +171,10 @@ const CreatePost = () => {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="false">
-                                                Private
+                                                {t("private")}
                                             </SelectItem>
                                             <SelectItem value="true">
-                                                Public
+                                                {t("public")}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -187,7 +188,7 @@ const CreatePost = () => {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t("description")}</FormLabel>
                                 <FormControl>
                                     <Textarea {...field} />
                                 </FormControl>
@@ -198,7 +199,7 @@ const CreatePost = () => {
                     {error && <FormMessage type="error">{error}</FormMessage>}
 
                     <Button variant="secondary" type="submit">
-                        Create post
+                        {t("menu_create")}
                     </Button>
                 </form>
             </Form>

@@ -30,6 +30,7 @@ import { login } from "@/api/endpoints";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 
 const fallback = "/" as const;
 
@@ -51,11 +52,12 @@ async function sleep(ms: number) {
 }
 
 function Login() {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-1 justify-center items-center w-full">
             <Card className="w-96">
                 <CardHeader>
-                    <CardTitle>Login</CardTitle>
+                    <CardTitle>{t("login")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <FormContainer />
@@ -64,13 +66,13 @@ function Login() {
                 <CardContent className="flex relative">
                     <Separator />
                     <div className="absolute w-full translate-x-1/2 -left-1/2 -top-1/2 text-center">
-                        Or
+                        {t("or")}
                     </div>
                 </CardContent>
                 <CardFooter>
                     <Link className="w-full" to="/register">
                         <Button variant="ghost" className="w-full">
-                            Sign up
+                            {t("sign_up")}
                         </Button>
                     </Link>
                 </CardFooter>
@@ -92,7 +94,7 @@ const FormContainer = () => {
     const [captcha, setCaptcha] = useState<string>("");
     const searchParams = new URLSearchParams(window.location.search);
     const redirectTo = searchParams.get("redirect") || fallback;
-
+    const { t } = useTranslation();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -128,7 +130,7 @@ const FormContainer = () => {
                     name="usernameOrEmail"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t("email")}</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -141,7 +143,7 @@ const FormContainer = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>{t("password")}</FormLabel>
                             <FormControl>
                                 <Input type="password" {...field} />
                             </FormControl>
@@ -161,7 +163,7 @@ const FormContainer = () => {
                     type="submit"
                     className="w-full mt-4"
                 >
-                    Login
+                    {t("login")}
                 </Button>
             </form>
         </Form>
