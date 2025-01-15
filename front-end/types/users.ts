@@ -3,9 +3,9 @@ export type User = {
     email: string;
 };
 
-export type UserProfile = {
+export type TProfile = {
     username: string;
     fullName: string;
     bio: string;
-    profileImg: string;
+    profileImageUrl: string;
 };

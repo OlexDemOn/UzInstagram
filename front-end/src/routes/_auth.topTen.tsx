@@ -1,27 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { animateScroll as scroll } from "react-scroll";
-import { Button } from "@/components/ui/button";
 import {
-    PostContainer,
     AvatarContainer,
     ImageContainer,
+    PostContainer,
 } from "@/components/post";
+import { createFileRoute } from "@tanstack/react-router";
+import axios from "axios";
 import { useAuth } from "../../providers/AuthProvider";
-import type { TPost } from "types/post";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { TPost } from "types/post";
 
-export const Route = createFileRoute("/_auth/")({
-    component: () => <Index />,
+export const Route = createFileRoute("/_auth/topTen")({
+    component: () => <TopTen />,
 });
 
-const Index = () => {
+const TopTen = () => {
     const [posts, setPosts] = useState<TPost[]>([]);
-    const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    const [isVisible, setIsVisible] = useState(false);
     const { t } = useTranslation();
 
     const auth = useAuth();
@@ -33,14 +29,14 @@ const Index = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://localhost:5000/api/posts?page=${page}`,
+                `http://localhost:5000/api/posts/top10`,
                 {
                     headers: {
                         Authorization: username,
                     },
                 }
             );
-            setPosts((prev) => [...prev, ...response.data.data.posts]);
+            setPosts((prev) => [...prev, ...response.data.data]);
             setHasMore(response.data.data.hasMorePosts);
         } catch (error) {
             console.error("Error fetching posts:", error);
@@ -51,31 +47,7 @@ const Index = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, [page]);
-
-    const handleScroll = () => {
-        if (window.scrollY > 200) {
-            setIsVisible(true);
-        } else {
-            setIsVisible(false);
-        }
-        if (loading || !hasMore) return;
-        if (
-            window.innerHeight + document.documentElement.scrollTop >=
-            document.documentElement.offsetHeight - 200
-        ) {
-            setPage((prev) => prev + 1);
-        }
-    };
-
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
-
-    const scrollToTop = () => {
-        scroll.scrollToTop({ duration: 500, smooth: true });
-    };
 
     return (
         <div className="flex flex-col items-center gap-5 max-w-[600px] mx-auto">
@@ -93,18 +65,6 @@ const Index = () => {
             ))}
             {loading && <p>{t("loading")}</p>}
             {!hasMore && <p>No more posts to show.</p>}
-            <div>
-                {isVisible && (
-                    <Button
-                        onClick={scrollToTop}
-                        className="fixed bottom-4 right-4 bg-primary text-white rounded-full shadow-lg hover:bg-primary-dark transition-all text-2xl"
-                    >
-                        ↑
-                    </Button>
-                )}
-            </div>
         </div>
     );
 };
-
-export default Index;

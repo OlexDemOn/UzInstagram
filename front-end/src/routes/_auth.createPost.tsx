@@ -18,6 +18,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_auth/createPost")({
     component: () => <CreatePost />,
@@ -26,6 +34,7 @@ export const Route = createFileRoute("/_auth/createPost")({
 const formSchema = z.object({
     title: z.string().min(2),
     imageUrl: z.instanceof(File).optional(),
+    postType: z.boolean(),
     description: z.string(),
 });
 
@@ -35,24 +44,26 @@ const CreatePost = () => {
     const navigate = useNavigate();
     const auth = useAuth();
     const username = auth.user?.username || "";
+    const { t } = useTranslation();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
             imageUrl: null,
+            postType: true,
             description: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const { title, imageUrl, description } = values;
-
+        const { title, imageUrl, postType, description } = values;
+        // console.log(values);
         try {
             await axios
                 .put(
                     "http://localhost:5000/api/posts",
-                    { title, imageUrl, description },
+                    { title, imageUrl, postType, description },
                     {
                         headers: {
                             "Content-Type": "multipart/form-data",
@@ -70,10 +81,9 @@ const CreatePost = () => {
             setError(error.message);
         }
     }
-
     return (
         <Card className="max-w-md mx-auto p-4">
-            <h1 className="text-xl font-bold mb-4">Create a Post</h1>
+            <h1 className="text-xl font-bold mb-4">{t("menu_create")}</h1>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -84,7 +94,7 @@ const CreatePost = () => {
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Title</FormLabel>
+                                <FormLabel>{t("title")}</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -98,7 +108,7 @@ const CreatePost = () => {
                         name="imageUrl"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Post img</FormLabel>
+                                <FormLabel>{t("post_img")}</FormLabel>
                                 <div className="flex flex-col gap-3">
                                     <FormControl>
                                         <Input
@@ -145,10 +155,40 @@ const CreatePost = () => {
 
                     <FormField
                         control={form.control}
+                        name="postType"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t("post_type")}</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        onValueChange={(value) =>
+                                            field.onChange(value === "true")
+                                        }
+                                        defaultValue="true"
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Post type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="false">
+                                                {t("private")}
+                                            </SelectItem>
+                                            <SelectItem value="true">
+                                                {t("public")}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t("description")}</FormLabel>
                                 <FormControl>
                                     <Textarea {...field} />
                                 </FormControl>
@@ -157,8 +197,9 @@ const CreatePost = () => {
                         )}
                     />
                     {error && <FormMessage type="error">{error}</FormMessage>}
+
                     <Button variant="secondary" type="submit">
-                        Create post
+                        {t("menu_create")}
                     </Button>
                 </form>
             </Form>

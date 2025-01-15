@@ -4,13 +4,8 @@ import com.example.demo.imgHandle.SaveImage;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 @Service
@@ -68,5 +63,63 @@ public class UserService {
         }
 
         return userRepository.save(user); // Save the updated user profile
+    }
+
+    public void followUser(String username, String followUsername) {
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
+        User userToFollow = userRepository.findByUsername(followUsername)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + followUsername));
+
+        userToFollow.getFollowers().add(user);
+        user.getFollowers().add(userToFollow);
+        userRepository.save(userToFollow);
+        userRepository.save(user);
+    }
+
+    public void unfollowUser(String username, String followUsername) {
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
+        User userToUnfollow = userRepository.findByUsername(followUsername)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + followUsername));
+
+        userToUnfollow.getFollowers().remove(user);
+        user.getFollowing().remove(userToUnfollow);
+        userRepository.save(userToUnfollow);
+        userRepository.save(user);
+
+    }
+
+    public boolean isFollowing(String username, String followUsername) {
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
+        User userToCheck = userRepository.findByUsername(followUsername)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + followUsername));
+
+        return user.getFollowing().contains(userToCheck);
+    }
+
+    public boolean isFollowingEachOther(String username, String followUsername){
+        if (username.equals(followUsername)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+        User user = userRepository.findByUsername(username)
+               .orElseThrow(() -> new RuntimeException("User not found with id: " + username));
+        User userToCheck = userRepository.findByUsername(followUsername)
+               .orElseThrow(() -> new RuntimeException("User not found with id: " + followUsername));
+
+
+
+        return user.getFollowing().contains(userToCheck) && userToCheck.getFollowing().contains(user);
     }
 }

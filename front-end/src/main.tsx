@@ -5,6 +5,7 @@ import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "./components/theme-provider";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "react-query";
+import "./i18n";
 
 const router = createRouter({ routeTree });
 

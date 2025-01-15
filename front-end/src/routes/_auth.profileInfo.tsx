@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfile } from "types/users";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_auth/profileInfo")({
     component: UserInfo,
@@ -30,7 +31,7 @@ function UserInfo() {
     const auth = useAuth();
     const username = auth.user?.username || "";
     const [userProfile, setUserProfile] = useState<UserProfile>();
-
+    const { t } = useTranslation();
     useEffect(() => {
         const test = async () => {
             const response = await getProfile(username);
@@ -43,10 +44,10 @@ function UserInfo() {
         <div className="flex flex-1 justify-center items-center w-full gap-5">
             <Card className="w-80">
                 <CardHeader>
-                    <CardTitle>Give more information about you</CardTitle>
+                    <CardTitle>{t("profileInfo_title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <CardTitle>Username: </CardTitle>
+                    <CardTitle>{t("username")}</CardTitle>
                     {username}
                 </CardContent>
                 <CardContent>
@@ -77,7 +78,7 @@ const FormContainer = ({
 }) => {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-
+    const { t } = useTranslation();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -131,7 +132,7 @@ const FormContainer = ({
                     name="profileImg"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Profile img</FormLabel>
+                            <FormLabel>{t("profile_img")}</FormLabel>
                             <div className="flex gap-5">
                                 <Avatar>
                                     <AvatarImage src={userProfile.profileImg} />
@@ -159,7 +160,7 @@ const FormContainer = ({
                     name="fullName"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Full name</FormLabel>
+                            <FormLabel>{t("full_name")}</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -173,7 +174,7 @@ const FormContainer = ({
                     name="bio"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Bio</FormLabel>
+                            <FormLabel>{t("bio")}</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -188,12 +189,10 @@ const FormContainer = ({
                         type="submit"
                         onClick={() => navigate({ to: "/" })}
                     >
-                        Skip
+                        {t("skip")}
                     </Button>
                     <Separator orientation="vertical" />
-                    <Button variant="secondary" type="submit">
-                        Update
-                    </Button>
+                    <Button type="submit">{t("update")}</Button>
                 </div>
             </form>
         </Form>

@@ -30,6 +30,7 @@ import { register } from "@/api/endpoints";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 
 const fallback = "/" as const;
 
@@ -42,19 +43,20 @@ export const Route = createFileRoute("/register")({
             throw redirect({ to: fallback });
         }
     },
-    component: Login,
+    component: Registration,
 });
 
 async function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function Login() {
+function Registration() {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-1 justify-center items-center w-full">
             <Card className="w-96">
                 <CardHeader>
-                    <CardTitle>Registration</CardTitle>
+                    <CardTitle>{t("registration")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <FormContainer />
@@ -62,13 +64,13 @@ function Login() {
                 <CardContent className="flex relative">
                     <Separator />
                     <div className="absolute w-full translate-x-1/2 -left-1/2 -top-1/2 text-center">
-                        Or
+                        {t("or")}
                     </div>
                 </CardContent>
                 <CardFooter>
                     <Link className="w-full" to="/login">
                         <Button variant="ghost" className="w-full">
-                            Sign in
+                            {t("sign_in")}
                         </Button>
                     </Link>
                 </CardFooter>
@@ -89,7 +91,7 @@ const FormContainer = () => {
     const router = useRouter();
     const navigate = useNavigate();
     const [captcha, setCaptcha] = useState<string>("");
-
+    const { t } = useTranslation();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -124,7 +126,7 @@ const FormContainer = () => {
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t("email")}</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -137,7 +139,7 @@ const FormContainer = () => {
                     name="username"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>{t("username")}</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -150,7 +152,7 @@ const FormContainer = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>{t("password")}</FormLabel>
                             <FormControl>
                                 <Input type="password" {...field} />
                             </FormControl>
@@ -170,7 +172,7 @@ const FormContainer = () => {
                     type="submit"
                     className="w-full mt-4"
                 >
-                    Sign up
+                    {t("sign_up")}
                 </Button>
             </form>
         </Form>

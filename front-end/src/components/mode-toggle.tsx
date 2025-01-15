@@ -8,10 +8,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/theme-provider";
-
+import { useTranslation } from "react-i18next";
+import { MdLanguage } from "react-icons/md";
 export function ModeToggle() {
     const { setTheme } = useTheme();
-
+    const { t } = useTranslation();
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -23,13 +24,40 @@ export function ModeToggle() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                    Light
+                    {t("theme_light")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    Dark
+                    {t("theme_dark")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                    System
+                    {t("theme_system")}
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
+
+export function LanguageToggle() {
+    const { i18n } = useTranslation();
+
+    const changeLanguage = (lng: string) => {
+        i18n.changeLanguage(lng);
+    };
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                    <MdLanguage className="h-[1.2rem] w-[1.2rem]" />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => changeLanguage("en")}>
+                    En
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage("pl")}>
+                    Pl
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
