@@ -1,47 +1,36 @@
 
 package com.example.demo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Map;
+@Setter
+@Getter
+@Schema(description = "Standard API Response")
 public class ApiResponse {
+
+    @Schema(description = "Indicates if the request was successful")
     private boolean success;
+
+    @Schema(description = "Error or success message")
     private String message;
+
+    @Schema(description = "Return data")
     private Object data;
 
-    // Constructors
-    public ApiResponse() {}
+    // Constructors, Getters, Setters
 
     public ApiResponse(boolean success, String message) {
         this.success = success;
         this.message = message;
     }
 
-    public ApiResponse(boolean success, String message, Object data) {
-        this(success, message);
-        this.data = data;
-    }
-
-    // Getters and Setters
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
+    public ApiResponse(boolean success, String message,Object data) {
         this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
         this.message = message;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
         this.data = data;
     }
+
 }

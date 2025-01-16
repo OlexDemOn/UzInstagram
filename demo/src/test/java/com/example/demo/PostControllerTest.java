@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -136,12 +135,12 @@ public class PostControllerTest {
         Mockito.when(postRepository.findPostById(postId)).thenReturn(mockPost);
 
         // Act
-        ResponseEntity<?> response = postController.likePost(postId, username);
+        ResponseEntity<ApiResponse> response = postController.likePost(postId, username);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Post liked", response.getBody());
+        assertEquals("Post liked", Objects.requireNonNull(response.getBody()).getMessage());
 
         Mockito.verify(likesService).likePost(mockPost, mockUser);
     }
@@ -162,12 +161,12 @@ public class PostControllerTest {
         Mockito.when(postRepository.findPostById(postId)).thenReturn(mockPost);
 
         // Act
-        ResponseEntity<?> response = postController.unlikePost(postId, username);
+        ResponseEntity<ApiResponse> response = postController.unlikePost(postId, username);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Post unliked", response.getBody());
+        assertEquals("Post unliked", Objects.requireNonNull(response.getBody()).getMessage());
 
         Mockito.verify(likesService).unlikePost(mockPost, mockUser);
     }

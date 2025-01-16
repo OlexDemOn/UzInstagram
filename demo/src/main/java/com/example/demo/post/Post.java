@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The type Post.
+ */
 @Entity
 @Setter
 @Getter
