@@ -130,7 +130,9 @@ const FormContainer = () => {
                     name="usernameOrEmail"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t("email")}</FormLabel>
+                            <FormLabel>
+                                {t("email")} {t("or")} {t("username")}
+                            </FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -159,7 +161,6 @@ const FormContainer = () => {
                 {error && <FormMessage typeof="error">{error}</FormMessage>}
                 <Button
                     disabled={!captcha}
-                    variant="secondary"
                     type="submit"
                     className="w-full mt-4"
                 >

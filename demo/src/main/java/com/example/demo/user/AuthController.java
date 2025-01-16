@@ -1,6 +1,11 @@
 package com.example.demo.user;
 
 import com.example.demo.dto.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,9 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/**
+ * The type Auth controller.
+ */
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+
 public class AuthController {
 
     @Autowired
@@ -28,6 +37,13 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Register user response entity.
+     *
+     * @param userRegistrationDTO the user registration dto
+     * @param bindingResult       the binding result
+     * @return the response entity
+     */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -60,6 +76,13 @@ public class AuthController {
         }
     }
 
+    /**
+     * Login user response entity.
+     *
+     * @param userLoginDTO  the user login dto
+     * @param bindingResult the binding result
+     * @return the response entity
+     */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> loginUser(@Valid @RequestBody UserLoginDTO userLoginDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -85,7 +108,15 @@ public class AuthController {
     }
 
 
-
+    /**
+     * Update user profile response entity.
+     *
+     * @param username   the username
+     * @param fullName   the full name
+     * @param bio        the bio
+     * @param profileImg the profile img
+     * @return the response entity
+     */
     @PutMapping(value = "/profile")
     public ResponseEntity<ApiResponse> updateUserProfile(
             @RequestHeader("Authorization") String username,
@@ -96,7 +127,8 @@ public class AuthController {
             String contentType = profileImg.getContentType();
             assert contentType != null;
             if (!contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
-                throw new IllegalArgumentException("Only JPEG or PNG images are allowed");
+                ApiResponse response = new ApiResponse(false, "Only JPEG or PNG images are allowed");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
 
             UserProfileUpdateDTO updateDTO = new UserProfileUpdateDTO(username, fullName, bio, profileImg);
@@ -110,17 +142,54 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Get user details",
+            description = "Fetches details of a user by username")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+                    description = "Successful response",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = """
+                             {
+                               "success": true,
+                               "message": "User details fetched successfully",
+                               "data": {
+                                 "userId": 1,
+                                 "username": "aboltus",
+                                 "email": "aboltus@example.com"
+                               }
+                             }
+                         """)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = """
+                             {
+                               "success": false,
+                               "message": "User not found",
+                               "data": null
+                             }
+                         """)
+                    )
+            )
+    })
+
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader(value="Authorization") String username) throws IOException {
         if (username == null) {
             ApiResponse response = new ApiResponse(false, "User is not logged in");
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ApiResponse>(response, HttpStatus.UNAUTHORIZED);
         }
 
 
         if (userRepository.findByUsername(username).isEmpty()) {
             ApiResponse response = new ApiResponse(false, "User isn't authenticated");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<ApiResponse>(response, HttpStatus.OK);
         }
         User user = userRepository.findByUsername(username).get();
 
@@ -143,6 +212,6 @@ public class AuthController {
         }
 
         ApiResponse response = new ApiResponse(true, "User profile fetched successfully", profile);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<ApiResponse>(response, HttpStatus.OK);
     }
 }

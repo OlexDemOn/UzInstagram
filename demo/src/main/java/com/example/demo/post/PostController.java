@@ -41,38 +41,59 @@ public class PostController {
     private CommentService commentService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private PostService postService;
 
     @PostMapping("/{postId}/like")
-    public ResponseEntity<?> likePost(@PathVariable Long postId, @RequestHeader(value="Authorization") String username) {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Post post= postRepository.findPostById(postId);
-        likesService.likePost(post, user);
-        return ResponseEntity.ok("Post liked");
+    public ResponseEntity<ApiResponse> likePost(@PathVariable Long postId, @RequestHeader(value = "Authorization") String username) {
+        return handleLikeAction(postId, username, true);
     }
 
     @PostMapping("/{postId}/unlike")
-    public ResponseEntity<?> unlikePost(@PathVariable Long postId, @RequestHeader(value="Authorization") String username) {
+    public ResponseEntity<ApiResponse> unlikePost(@PathVariable Long postId, @RequestHeader(value = "Authorization") String username) {
+        return handleLikeAction(postId, username, false);
+    }
+
+    private ResponseEntity<ApiResponse> handleLikeAction(Long postId, String username, boolean isLike) {
+        if (username == null) {
+            ApiResponse response = new ApiResponse(false, "User is not logged in");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        if (postId == null) {
+            ApiResponse response = new ApiResponse(false, "Invalid post ID is null");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Post post = postRepository.findPostById(postId);
-        likesService.unlikePost(post, user);
-        return ResponseEntity.ok("Post unliked");
+
+        if (isLike) {
+            likesService.likePost(post, user);
+//            return ResponseEntity.ok("Post liked");
+            ApiResponse response = new ApiResponse(false, "Post liked");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            likesService.unlikePost(post, user);
+            ApiResponse response = new ApiResponse(false, "Post unliked");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse> getPosts(@RequestParam(defaultValue = "0") int page, @RequestHeader(value="Authorization") String username) {
+
+        if (username == null) {
+            ApiResponse response = new ApiResponse(false, "User is not logged in");
+            return new ResponseEntity<ApiResponse>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         int pageSize = 5;
         PageRequest pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
         Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
-
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<PostResponse> data = posts.getContent().stream()
                 .filter(post -> post.isOpened() || userService.isFollowingEachOther(username, post.getUser().getUsername()) || Objects.equals(username, post.getUser().getUsername()))
@@ -125,11 +146,16 @@ public class PostController {
         responseBody.put("hasMorePosts", hasMorePosts);
 
         ApiResponse response = new ApiResponse(true, "User profile fetched successfully", responseBody);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<ApiResponse>(response, HttpStatus.OK);
     }
 
     @GetMapping("/user")
     public ResponseEntity<ApiResponse> getPostByUser(@RequestParam(required = true) String username, @RequestHeader(value="Authorization") String usernameCurrent) {
+        if (username == null || usernameCurrent == null) {
+            ApiResponse response = new ApiResponse(false, "User is not logged in");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -325,7 +351,6 @@ public class PostController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        PostService postService = new PostService();
         ApiResponse response = new ApiResponse(true, "User profile fetched successfully", postService.filterAvailablePosts(posts, user));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
